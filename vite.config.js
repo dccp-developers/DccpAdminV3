@@ -6,7 +6,7 @@ import { defineConfig } from "vite";
 export default defineConfig({
     plugins: [
         laravel({
-            input: ["resources/css/app.css", "resources/js/App.tsx"],
+            input: ["resources/css/app.css", "resources/js/App.tsx", "vendor/andreia/filament-nord-theme/resources/css/theme.css"],
             refresh: true,
         }),
         react(),

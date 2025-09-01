@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Providers\Filament;
 
 use AchyutN\FilamentLogViewer\FilamentLogViewer;
+use Andreia\FilamentNordTheme\FilamentNordThemePlugin;
 use App\Enums\UserRole;
 use App\Settings\SiteSettings;
 use Awcodes\Gravatar\GravatarPlugin;
@@ -105,6 +106,8 @@ final class AdminPanelProvider extends PanelProvider
                     ->shouldShowAvatarForm(false)
                     ->shouldShowDeleteAccountForm(true)
                     ->shouldShowEmailForm(false),
+
+                    FilamentNordThemePlugin::make(),
             ])
             ->userMenuItems([
                 'profile' => Action::make('profile')

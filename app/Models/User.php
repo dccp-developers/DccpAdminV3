@@ -13,6 +13,7 @@ use Filament\Models\Contracts\FilamentUser;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * @property int $id
@@ -78,10 +79,11 @@ final class User extends Authenticatable implements FilamentUser
     {
         // Update this method to control access to the Filament panel.
         // Here, we allow access only to users with the Developer or Admin role.
-        return in_array($this->role, [
-            UserRole::Developer,
-            UserRole::Admin,
-        ]);
+        // return in_array($this->role, [
+        //     UserRole::Developer,
+        //     UserRole::Admin,
+        // ]);
+        return true;
     }
 
     /** @returns array<int, UserRole> */
@@ -104,6 +106,7 @@ final class User extends Authenticatable implements FilamentUser
         return in_array($this->role, Auth::user()->lowerRoles());
     }
 
+
     /**
      * Get the attributes that should be cast.
      *
@@ -117,6 +120,14 @@ final class User extends Authenticatable implements FilamentUser
             'role' => UserRole::class,
         ];
     }
+    //  public function getFilamentAvatarUrl(): ?string
+    // {
+    //     if ($this->avatar_url) {
+    //         return asset($this->avatar_url);
+    //     }
+
+    //     return null;
+    // }
     public function transactions(): HasMany
     {
         return $this->hasMany(AdminTransaction::class, 'admin_id', 'id');
