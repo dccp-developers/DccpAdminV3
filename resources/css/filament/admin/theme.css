@@ -1,6 +1,0 @@
-@import "../../../../vendor/filafly/lucent/resources/css/theme.css";
-
-@import "../../../../vendor/filament/filament/resources/css/theme.css";
-
-@source '../../../../app/Filament/**/*';
-@source '../../../../resources/views/filament/**/*';
