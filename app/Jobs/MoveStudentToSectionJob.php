@@ -4,22 +4,22 @@ declare(strict_types=1);
 
 namespace App\Jobs;
 
-use Exception;
-use Throwable;
-use App\Models\User;
-use Filament\Actions\Action;
-use Illuminate\Bus\Queueable;
 use App\Models\ClassEnrollment;
-// use Filament\Notifications\Actions\Action;
 use App\Models\StudentEnrollment;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Queue\SerializesModels;
+use App\Models\User;
+use App\Services\StudentSectionTransferService;
+use App\Services\StudentTransferEmailService;
+use Exception;
+// use Filament\Notifications\Actions\Action;
+use Filament\Actions\Action;
 use Filament\Notifications\Notification;
-use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
-use App\Services\StudentTransferEmailService;
-use App\Services\StudentSectionTransferService;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
+use Throwable;
 
 /**
  * Background job for moving a single student to a different section
@@ -29,7 +29,9 @@ final class MoveStudentToSectionJob implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public int $timeout = 120; // 2 minutes timeout
+
     public int $tries = 3;
+
     public int $maxExceptions = 2;
 
     private string $jobId;
@@ -52,7 +54,7 @@ final class MoveStudentToSectionJob implements ShouldQueue
             'class_enrollment_id' => $this->classEnrollmentId,
             'new_class_id' => $this->newClassId,
             'initiated_by' => $this->initiatedByUserId,
-            'notify_student' => $this->notifyStudent
+            'notify_student' => $this->notifyStudent,
         ]);
     }
 
@@ -65,14 +67,14 @@ final class MoveStudentToSectionJob implements ShouldQueue
             Log::info('Starting student section transfer job', [
                 'job_id' => $this->jobId,
                 'class_enrollment_id' => $this->classEnrollmentId,
-                'new_class_id' => $this->newClassId
+                'new_class_id' => $this->newClassId,
             ]);
 
             // Find the class enrollment record
             $classEnrollment = ClassEnrollment::with(['student', 'class'])
                 ->find($this->classEnrollmentId);
 
-            if (!$classEnrollment) {
+            if (! $classEnrollment) {
                 throw new Exception("Class enrollment not found: {$this->classEnrollmentId}");
             }
 
@@ -89,7 +91,7 @@ final class MoveStudentToSectionJob implements ShouldQueue
                 'student_email_sent' => $emailResults['student_email_sent'],
                 'faculty_email_sent' => $emailResults['faculty_email_sent'],
                 'student_email_error' => $emailResults['student_email_error'],
-                'faculty_email_error' => $emailResults['faculty_email_error']
+                'faculty_email_error' => $emailResults['faculty_email_error'],
             ]);
 
             // Send success notification
@@ -98,7 +100,7 @@ final class MoveStudentToSectionJob implements ShouldQueue
             Log::info('Student section transfer job completed successfully', [
                 'job_id' => $this->jobId,
                 'result' => $result,
-                'email_results' => $emailResults
+                'email_results' => $emailResults,
             ]);
 
         } catch (Exception $e) {
@@ -107,7 +109,7 @@ final class MoveStudentToSectionJob implements ShouldQueue
                 'class_enrollment_id' => $this->classEnrollmentId,
                 'new_class_id' => $this->newClassId,
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
 
             // Send failure notification
@@ -127,7 +129,7 @@ final class MoveStudentToSectionJob implements ShouldQueue
             'class_enrollment_id' => $this->classEnrollmentId,
             'new_class_id' => $this->newClassId,
             'attempts' => $this->attempts(),
-            'exception' => $exception->getMessage()
+            'exception' => $exception->getMessage(),
         ]);
 
         $this->sendFailureNotification($exception);
@@ -161,10 +163,10 @@ final class MoveStudentToSectionJob implements ShouldQueue
 
             foreach ($usersToNotify as $user) {
                 $emailStatus = '';
-                if (!empty($emailResults)) {
+                if (! empty($emailResults)) {
                     $emailStatus = "\n**Email Notifications:**";
-                    $emailStatus .= $emailResults['student_email_sent'] ? " ✅ Student notified" : " ❌ Student email failed";
-                    $emailStatus .= $emailResults['faculty_email_sent'] ? " | ✅ Faculty notified" : " | ❌ Faculty email failed/not applicable";
+                    $emailStatus .= $emailResults['student_email_sent'] ? ' ✅ Student notified' : ' ❌ Student email failed';
+                    $emailStatus .= $emailResults['faculty_email_sent'] ? ' | ✅ Faculty notified' : ' | ❌ Faculty email failed/not applicable';
                 }
 
                 $notification = Notification::make()
@@ -174,7 +176,7 @@ final class MoveStudentToSectionJob implements ShouldQueue
                         **Subject:** {$result['subject_code']}
                         **From:** Section {$result['old_section']}
                         **To:** Section {$result['new_section']}
-                        **Updated Records:** Class Enrollment" . ($result['subject_enrollment_updated'] ? " & Subject Enrollment" : "") . $emailStatus
+                        **Updated Records:** Class Enrollment".($result['subject_enrollment_updated'] ? ' & Subject Enrollment' : '').$emailStatus
                     )
                     ->success()
                     ->icon('heroicon-o-arrow-right-on-rectangle')
@@ -187,7 +189,7 @@ final class MoveStudentToSectionJob implements ShouldQueue
                             ->label('View Student Enrollment')
                             ->icon('heroicon-o-eye')
                             ->url(route('filament.admin.resources.student-enrollments.view', ['record' => $studentEnrollment->id]))
-                            ->openUrlInNewTab()
+                            ->openUrlInNewTab(),
                     ]);
                 } else {
                     $notification->actions([
@@ -195,7 +197,7 @@ final class MoveStudentToSectionJob implements ShouldQueue
                             ->label('View Student Profile')
                             ->icon('heroicon-o-user')
                             ->url(route('filament.admin.resources.students.view', ['record' => $result['student_id']]))
-                            ->openUrlInNewTab()
+                            ->openUrlInNewTab(),
                     ]);
                 }
 
@@ -205,13 +207,13 @@ final class MoveStudentToSectionJob implements ShouldQueue
             Log::info('Success notifications sent for student transfer', [
                 'job_id' => $this->jobId,
                 'student_id' => $result['student_id'],
-                'notification_count' => $usersToNotify->count()
+                'notification_count' => $usersToNotify->count(),
             ]);
 
         } catch (Exception $e) {
             Log::error('Failed to send success notification for student transfer', [
                 'job_id' => $this->jobId,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
         }
     }
@@ -264,13 +266,13 @@ final class MoveStudentToSectionJob implements ShouldQueue
 
             Log::info('Failure notifications sent for student transfer', [
                 'job_id' => $this->jobId,
-                'notification_count' => $usersToNotify->count()
+                'notification_count' => $usersToNotify->count(),
             ]);
 
         } catch (Exception $e) {
             Log::error('Failed to send failure notification for student transfer', [
                 'job_id' => $this->jobId,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
         }
     }
@@ -282,9 +284,9 @@ final class MoveStudentToSectionJob implements ShouldQueue
     {
         return [
             'student-transfer',
-            'class-enrollment:' . $this->classEnrollmentId,
-            'target-class:' . $this->newClassId,
-            'job-id:' . $this->jobId
+            'class-enrollment:'.$this->classEnrollmentId,
+            'target-class:'.$this->newClassId,
+            'job-id:'.$this->jobId,
         ];
     }
 }

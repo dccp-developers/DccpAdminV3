@@ -8,7 +8,6 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model; // Added
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -22,9 +21,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read int|null $strands_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\ShsStudent> $students
  * @property-read int|null $students_count
+ *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ShsTrack newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ShsTrack newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ShsTrack query()
+ *
  * @mixin \Eloquent
  */
 final class ShsTrack extends Model

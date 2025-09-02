@@ -8,7 +8,6 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -19,9 +18,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property-read \App\Models\Student|null $student
  * @property-read \App\Models\StudentEnrollment|null $studentEnrollment
  * @property-read \App\Models\Subject|null $subject
+ *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|SubjectEnrollment newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|SubjectEnrollment newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|SubjectEnrollment query()
+ *
  * @mixin \Eloquent
  */
 final class SubjectEnrollment extends Model
@@ -124,12 +125,13 @@ final class SubjectEnrollment extends Model
             $oldClass = Classes::find($oldClassId);
             $newClass = Classes::find($newClassId);
 
-            if (!$oldClass || !$newClass) {
+            if (! $oldClass || ! $newClass) {
                 \Illuminate\Support\Facades\Log::warning('Class not found during enrollment update', [
                     'old_class_id' => $oldClassId,
                     'new_class_id' => $newClassId,
-                    'student_id' => $subjectEnrollment->student_id
+                    'student_id' => $subjectEnrollment->student_id,
                 ]);
+
                 return;
             }
 
@@ -138,8 +140,9 @@ final class SubjectEnrollment extends Model
                 \Illuminate\Support\Facades\Log::warning('Attempting to move student between different subjects', [
                     'old_subject' => $oldClass->subject_code,
                     'new_subject' => $newClass->subject_code,
-                    'student_id' => $subjectEnrollment->student_id
+                    'student_id' => $subjectEnrollment->student_id,
                 ]);
+
                 return;
             }
 
@@ -173,7 +176,7 @@ final class SubjectEnrollment extends Model
                     ClassEnrollment::create([
                         'student_id' => $subjectEnrollment->student_id,
                         'class_id' => $newClassId,
-                        'status' => true
+                        'status' => true,
                     ]);
                     $message = "Student enrolled in {$newClass->subject_code} Section {$newClass->section}";
                 }
@@ -186,7 +189,7 @@ final class SubjectEnrollment extends Model
                 'old_section' => $oldClass->section,
                 'new_section' => $newClass->section,
                 'subject_code' => $oldClass->subject_code,
-                'action' => $message
+                'action' => $message,
             ]);
 
             // Send Filament notification
@@ -202,12 +205,12 @@ final class SubjectEnrollment extends Model
                 'student_id' => $subjectEnrollment->student_id,
                 'old_class_id' => $oldClassId,
                 'new_class_id' => $newClassId,
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
 
             \Filament\Notifications\Notification::make()
                 ->title('Class Enrollment Update Failed')
-                ->body('Failed to update class enrollment: ' . $e->getMessage())
+                ->body('Failed to update class enrollment: '.$e->getMessage())
                 ->danger()
                 ->send();
         }

@@ -4,12 +4,11 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use Exception;
-use Carbon\Carbon;
 use App\Models\Room;
 use App\Models\Schedule;
+use Carbon\Carbon;
+use Exception;
 use Illuminate\Support\Facades\Log;
-
 
 final class TimetableConflictResolutionService
 {

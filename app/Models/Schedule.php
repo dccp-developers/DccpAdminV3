@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Services\GeneralSettingsService;
-use DateTime;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory; // Import Builder
 use Illuminate\Database\Eloquent\Model; // Import Cache
@@ -22,6 +21,7 @@ use Illuminate\Support\Facades\Cache;
  * @property-read mixed $subject
  * @property-read string $time_range
  * @property-read \App\Models\Room|null $room
+ *
  * @method static Builder<static>|Schedule currentAcademicPeriod()
  * @method static Builder<static>|Schedule newModelQuery()
  * @method static Builder<static>|Schedule newQuery()
@@ -29,6 +29,7 @@ use Illuminate\Support\Facades\Cache;
  * @method static Builder<static>|Schedule query()
  * @method static Builder<static>|Schedule withTrashed(bool $withTrashed = true)
  * @method static Builder<static>|Schedule withoutTrashed()
+ *
  * @mixin \Eloquent
  */
 final class Schedule extends Model

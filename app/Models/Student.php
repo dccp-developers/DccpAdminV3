@@ -71,6 +71,7 @@ use Overtrue\LaravelVersionable\VersionStrategy;
  * @property-read int|null $subjects_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\StudentTransaction> $transactions
  * @property-read int|null $transactions_count
+ *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Student newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Student newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Student onlyTrashed()
@@ -98,6 +99,7 @@ use Overtrue\LaravelVersionable\VersionStrategy;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Student whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Student withTrashed(bool $withTrashed = true)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Student withoutTrashed()
+ *
  * @mixin \Eloquent
  */
 final class Student extends Model

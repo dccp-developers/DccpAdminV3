@@ -4,21 +4,22 @@ namespace App\Jobs;
 
 use App\Models\Classes;
 use Filament\Actions\Action;
-use Illuminate\Bus\Queueable;
-use Illuminate\Support\Facades\Log;
-use Spatie\Browsershot\Browsershot;
-use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Storage;
 use Filament\Notifications\Notification;
-use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
+use Spatie\Browsershot\Browsershot;
 
 class GenerateStudentListPdfJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public $timeout = 300; // 5 minutes timeout
+
     public $tries = 3;
 
     /**
@@ -46,13 +47,13 @@ class GenerateStudentListPdfJob implements ShouldQueue
             $enrolledStudents = $this->class->class_enrollments()
                 ->with([
                     'student:id,student_id,first_name,last_name,middle_name,course_id,academic_year',
-                    'student.course:id,code'
+                    'student.course:id,code',
                 ])
                 ->where('status', true) // Only active enrollments
                 ->get()
                 ->sortBy([
                     ['student.last_name', 'asc'],
-                    ['student.first_name', 'asc']
+                    ['student.first_name', 'asc'],
                 ]);
 
             // Prepare data for PDF
@@ -80,7 +81,7 @@ class GenerateStudentListPdfJob implements ShouldQueue
             Storage::disk('public')->makeDirectory($directory);
 
             // Full path for the PDF
-            $path = $directory . '/' . $filename;
+            $path = $directory.'/'.$filename;
             $fullPath = Storage::disk('public')->path($path);
 
             // Calculate scaling based on number of students
@@ -107,7 +108,7 @@ class GenerateStudentListPdfJob implements ShouldQueue
                     '--disable-renderer-backgrounding',
                     '--print-to-pdf-no-header',
                     '--run-all-compositor-stages-before-draw',
-                    '--disable-extensions'
+                    '--disable-extensions',
                 ]);
 
             // Set Chrome path if available
@@ -136,7 +137,7 @@ class GenerateStudentListPdfJob implements ShouldQueue
                 'class_id' => $this->class->id,
                 'user_id' => $this->userId,
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
 
             // Send error notification to user

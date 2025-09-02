@@ -8,11 +8,13 @@ use Illuminate\Database\Eloquent\Model;
 /**
  * @property-read \App\Models\Account|null $changedByUser
  * @property-read \App\Models\Account|null $undoneByUser
+ *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|StudentIdChangeLog newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|StudentIdChangeLog newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|StudentIdChangeLog query()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|StudentIdChangeLog undoable()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|StudentIdChangeLog undone()
+ *
  * @mixin \Eloquent
  */
 class StudentIdChangeLog extends Model

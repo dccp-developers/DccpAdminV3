@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -14,9 +13,11 @@ use Illuminate\Database\Eloquent\Model;
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\ShsStudent> $students
  * @property-read int|null $students_count
  * @property-read \App\Models\ShsTrack|null $track
+ *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ShsStrand newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ShsStrand newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ShsStrand query()
+ *
  * @mixin \Eloquent
  */
 final class ShsStrand extends Model

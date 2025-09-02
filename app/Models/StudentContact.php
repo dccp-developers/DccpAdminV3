@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|StudentContact newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|StudentContact newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|StudentContact query()
+ *
  * @mixin \Eloquent
  */
 final class StudentContact extends Model

@@ -5,27 +5,26 @@ declare(strict_types=1);
 namespace App\Jobs;
 
 use App\Models\StudentEnrollment;
-use App\Services\GeneralSettingsService;
+use App\Models\User;
 use App\Services\BrowsershotService;
+use App\Services\GeneralSettingsService;
+use Filament\Actions\Action;
+use Filament\Notifications\Notification;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\DB;
-use Filament\Notifications\Notification;
-use Filament\Notifications\Actions\Action as NotificationAction;
-use App\Models\User;
-use Filament\Actions\Action;
 
 final class GenerateBulkAssessmentsJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public int $timeout = 1800; // 30 minutes timeout for bulk operations
+
     public int $tries = 2;
 
     private string $jobId;
@@ -39,7 +38,7 @@ final class GenerateBulkAssessmentsJob implements ShouldQueue
         ?string $jobId = null
     ) {
         $this->jobId = $jobId ?? uniqid('bulk_assessment_', true);
-        
+
         // Use default queue for bulk operations
         $this->onQueue('default');
 
@@ -70,6 +69,7 @@ final class GenerateBulkAssessmentsJob implements ShouldQueue
                     'No enrollments match the selected criteria.',
                     'warning'
                 );
+
                 return;
             }
 
@@ -96,7 +96,7 @@ final class GenerateBulkAssessmentsJob implements ShouldQueue
 
             $this->sendNotification(
                 'Assessment Generation Failed',
-                'Error: ' . $e->getMessage(),
+                'Error: '.$e->getMessage(),
                 'danger'
             );
 
@@ -129,7 +129,7 @@ final class GenerateBulkAssessmentsJob implements ShouldQueue
                 $subQuery->select(DB::raw(1))
                     ->from('courses')
                     ->whereRaw('CAST(student_enrollment.course_id AS BIGINT) = courses.id')
-                    ->where('courses.code', 'LIKE', $this->filters['course_filter'] . '%');
+                    ->where('courses.code', 'LIKE', $this->filters['course_filter'].'%');
             });
         }
 
@@ -145,7 +145,7 @@ final class GenerateBulkAssessmentsJob implements ShouldQueue
 
         // Get enrollments and sort by student last name alphabetically
         $enrollments = $query->get();
-        
+
         return $enrollments->sortBy(function ($enrollment) {
             return $enrollment->student->last_name ?? '';
         })->values(); // Reset array keys after sorting
@@ -158,7 +158,7 @@ final class GenerateBulkAssessmentsJob implements ShouldQueue
     {
         try {
             $settingsService = app(GeneralSettingsService::class);
-            $compiledPath = storage_path('app/public/bulk_assessments_' . date('Y-m-d_H-i-s') . '.pdf');
+            $compiledPath = storage_path('app/public/bulk_assessments_'.date('Y-m-d_H-i-s').'.pdf');
 
             // Generate combined HTML for all assessments
             $combinedHtml = $this->generateCombinedAssessmentHtml($enrollments, $settingsService);
@@ -176,7 +176,7 @@ final class GenerateBulkAssessmentsJob implements ShouldQueue
                 'wait_until_network_idle' => false,
             ]);
 
-            if (!$success || !file_exists($compiledPath)) {
+            if (! $success || ! file_exists($compiledPath)) {
                 throw new \Exception('BrowsershotService failed to generate combined PDF');
             }
 
@@ -235,17 +235,18 @@ final class GenerateBulkAssessmentsJob implements ShouldQueue
 
             $pageClass = $index === 0 ? 'first-page' : 'page-break';
             $assessmentHtml = view('pdf.assesment-form', $data)->render();
-            
+
             // Remove DOCTYPE and html/body tags from individual assessments
             $assessmentHtml = preg_replace('/<!DOCTYPE[^>]*>/', '', $assessmentHtml);
             $assessmentHtml = preg_replace('/<\/?html[^>]*>/', '', $assessmentHtml);
             $assessmentHtml = preg_replace('/<\/?head[^>]*>/', '', $assessmentHtml);
             $assessmentHtml = preg_replace('/<\/?body[^>]*>/', '', $assessmentHtml);
-            
+
             $combinedHtml .= "<div class=\"{$pageClass}\">{$assessmentHtml}</div>";
         }
 
         $combinedHtml .= '</body></html>';
+
         return $combinedHtml;
     }
 
@@ -272,11 +273,12 @@ final class GenerateBulkAssessmentsJob implements ShouldQueue
     {
         try {
             $user = User::find($this->userId);
-            if (!$user) {
+            if (! $user) {
                 Log::warning('User not found for notification', [
                     'job_id' => $this->jobId,
                     'user_id' => $this->userId,
                 ]);
+
                 return;
             }
 

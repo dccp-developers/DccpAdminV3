@@ -11,9 +11,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 /**
  * @property-read \App\Models\StudentEnrollment|null $enrollment
  * @property-read string $formatted_amount
+ *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|AdditionalFee newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|AdditionalFee newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|AdditionalFee query()
+ *
  * @mixin \Eloquent
  */
 final class AdditionalFee extends Model
@@ -43,6 +45,6 @@ final class AdditionalFee extends Model
      */
     public function getFormattedAmountAttribute(): string
     {
-        return '₱ ' . number_format((float) $this->amount, 2);
+        return '₱ '.number_format((float) $this->amount, 2);
     }
 }

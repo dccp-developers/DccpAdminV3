@@ -30,7 +30,7 @@ final class FacultySectionTransferNotification extends Mailable
      */
     public function envelope(): Envelope
     {
-        $subject = $this->isBulkTransfer 
+        $subject = $this->isBulkTransfer
             ? 'Class Roster Update - Multiple Student Transfers'
             : 'Class Roster Update - Student Transfer Notification';
 
@@ -44,7 +44,7 @@ final class FacultySectionTransferNotification extends Mailable
      */
     public function content(): Content
     {
-        $view = $this->isBulkTransfer 
+        $view = $this->isBulkTransfer
             ? 'emails.faculty-bulk-section-transfer'
             : 'emails.faculty-section-transfer';
 

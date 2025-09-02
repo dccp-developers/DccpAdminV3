@@ -9,7 +9,6 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\SubjectEnrolledEnum;
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -24,11 +23,13 @@ use Illuminate\Database\Eloquent\Model;
  * @property-read int|float $lecture_fee
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\SubjectEnrollment> $subjectEnrolleds
  * @property-read int|null $subject_enrolleds_count
+ *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Subject credited()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Subject newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Subject newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Subject nonCredited()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Subject query()
+ *
  * @mixin \Eloquent
  */
 final class Subject extends Model

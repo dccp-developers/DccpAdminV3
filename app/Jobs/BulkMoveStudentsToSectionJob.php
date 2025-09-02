@@ -14,7 +14,6 @@ use Filament\Notifications\Notification;
 use Illuminate\Bus\Batchable;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
@@ -30,7 +29,9 @@ final class BulkMoveStudentsToSectionJob implements ShouldQueue
     use Batchable, Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public int $timeout = 300; // 5 minutes timeout
+
     public int $tries = 2;
+
     public int $maxExceptions = 3;
 
     private string $jobId;
@@ -53,7 +54,7 @@ final class BulkMoveStudentsToSectionJob implements ShouldQueue
             'student_count' => count($this->classEnrollmentIds),
             'new_class_id' => $this->newClassId,
             'initiated_by' => $this->initiatedByUserId,
-            'notify_students' => $this->notifyStudents
+            'notify_students' => $this->notifyStudents,
         ]);
     }
 
@@ -64,6 +65,7 @@ final class BulkMoveStudentsToSectionJob implements ShouldQueue
     {
         if ($this->batch()?->cancelled()) {
             Log::info('Bulk transfer job cancelled', ['job_id' => $this->jobId]);
+
             return;
         }
 
@@ -71,7 +73,7 @@ final class BulkMoveStudentsToSectionJob implements ShouldQueue
             Log::info('Starting bulk student section transfer job', [
                 'job_id' => $this->jobId,
                 'student_count' => count($this->classEnrollmentIds),
-                'new_class_id' => $this->newClassId
+                'new_class_id' => $this->newClassId,
             ]);
 
             // Get class enrollments with related data
@@ -85,7 +87,7 @@ final class BulkMoveStudentsToSectionJob implements ShouldQueue
 
             // Get target class information
             $targetClass = Classes::find($this->newClassId);
-            if (!$targetClass) {
+            if (! $targetClass) {
                 throw new Exception("Target class not found: {$this->newClassId}");
             }
 
@@ -94,14 +96,14 @@ final class BulkMoveStudentsToSectionJob implements ShouldQueue
 
             // Send email notifications for successful transfers
             $emailResults = [];
-            if (!empty($results['successful_transfers'])) {
+            if (! empty($results['successful_transfers'])) {
                 $emailResults = $emailService->sendBulkTransferNotifications($results, $this->newClassId, $this->notifyStudents);
 
                 Log::info('Bulk email notifications processed', [
                     'job_id' => $this->jobId,
                     'student_emails_sent' => $emailResults['student_emails_sent'] ?? 0,
                     'faculty_email_sent' => $emailResults['faculty_email_sent'] ?? false,
-                    'student_email_errors' => count($emailResults['student_email_errors'] ?? [])
+                    'student_email_errors' => count($emailResults['student_email_errors'] ?? []),
                 ]);
             }
 
@@ -113,7 +115,7 @@ final class BulkMoveStudentsToSectionJob implements ShouldQueue
                 'total_students' => $results['total_students'],
                 'success_count' => $results['success_count'],
                 'error_count' => $results['error_count'],
-                'email_results' => $emailResults
+                'email_results' => $emailResults,
             ]);
 
         } catch (Exception $e) {
@@ -122,7 +124,7 @@ final class BulkMoveStudentsToSectionJob implements ShouldQueue
                 'student_count' => count($this->classEnrollmentIds),
                 'new_class_id' => $this->newClassId,
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
 
             $this->sendFailureNotification($e);
@@ -140,7 +142,7 @@ final class BulkMoveStudentsToSectionJob implements ShouldQueue
             'student_count' => count($this->classEnrollmentIds),
             'new_class_id' => $this->newClassId,
             'attempts' => $this->attempts(),
-            'exception' => $exception->getMessage()
+            'exception' => $exception->getMessage(),
         ]);
 
         $this->sendFailureNotification($exception);
@@ -167,22 +169,22 @@ final class BulkMoveStudentsToSectionJob implements ShouldQueue
             $usersToNotify = $usersToNotify->merge($superAdmins)->unique('id');
 
             foreach ($usersToNotify as $user) {
-                $notificationTitle = $results['error_count'] > 0 
+                $notificationTitle = $results['error_count'] > 0
                     ? 'Bulk Student Move Completed with Issues'
                     : 'Bulk Student Move Completed Successfully';
 
                 $notificationColor = $results['error_count'] > 0 ? 'warning' : 'success';
-                $notificationIcon = $results['error_count'] > 0 
+                $notificationIcon = $results['error_count'] > 0
                     ? 'heroicon-o-exclamation-triangle'
                     : 'heroicon-o-check-circle';
 
                 $emailStatus = '';
-                if (!empty($emailResults)) {
+                if (! empty($emailResults)) {
                     $emailStatus = "\n**Email Notifications:**";
                     $emailStatus .= " ✅ {$emailResults['student_emails_sent']} student(s) notified";
-                    $emailStatus .= $emailResults['faculty_email_sent'] ? " | ✅ Faculty notified" : " | ❌ Faculty email failed/not applicable";
-                    if (!empty($emailResults['student_email_errors'])) {
-                        $emailStatus .= " | ⚠️ " . count($emailResults['student_email_errors']) . " student email(s) failed";
+                    $emailStatus .= $emailResults['faculty_email_sent'] ? ' | ✅ Faculty notified' : ' | ❌ Faculty email failed/not applicable';
+                    if (! empty($emailResults['student_email_errors'])) {
+                        $emailStatus .= ' | ⚠️ '.count($emailResults['student_email_errors']).' student email(s) failed';
                     }
                 }
 
@@ -225,13 +227,13 @@ final class BulkMoveStudentsToSectionJob implements ShouldQueue
                 'job_id' => $this->jobId,
                 'notification_count' => $usersToNotify->count(),
                 'success_count' => $results['success_count'],
-                'error_count' => $results['error_count']
+                'error_count' => $results['error_count'],
             ]);
 
         } catch (Exception $e) {
             Log::error('Failed to send completion notification for bulk transfer', [
                 'job_id' => $this->jobId,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
         }
     }
@@ -259,9 +261,9 @@ final class BulkMoveStudentsToSectionJob implements ShouldQueue
             foreach ($usersToNotify as $user) {
                 Notification::make()
                     ->title('Bulk Student Transfer Failed')
-                    ->body("
+                    ->body('
                         **Operation:** Bulk Student Move
-                        **Students Count:** " . count($this->classEnrollmentIds) . "
+                        **Students Count:** '.count($this->classEnrollmentIds)."
                         **Target Class ID:** {$this->newClassId}
                         **Error:** {$exception->getMessage()}
                         **Job ID:** {$this->jobId}
@@ -277,13 +279,13 @@ final class BulkMoveStudentsToSectionJob implements ShouldQueue
 
             Log::info('Failure notifications sent for bulk transfer', [
                 'job_id' => $this->jobId,
-                'notification_count' => $usersToNotify->count()
+                'notification_count' => $usersToNotify->count(),
             ]);
 
         } catch (Exception $e) {
             Log::error('Failed to send failure notification for bulk transfer', [
                 'job_id' => $this->jobId,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
         }
     }
@@ -295,9 +297,9 @@ final class BulkMoveStudentsToSectionJob implements ShouldQueue
     {
         return [
             'bulk-student-transfer',
-            'student-count:' . count($this->classEnrollmentIds),
-            'target-class:' . $this->newClassId,
-            'job-id:' . $this->jobId
+            'student-count:'.count($this->classEnrollmentIds),
+            'target-class:'.$this->newClassId,
+            'job-id:'.$this->jobId,
         ];
     }
 
@@ -314,7 +316,7 @@ final class BulkMoveStudentsToSectionJob implements ShouldQueue
             'successful_transfers' => [],
             'failed_transfers' => [],
             'success_count' => 0,
-            'error_count' => 0
+            'error_count' => 0,
         ];
 
         $processed = 0;
@@ -334,14 +336,14 @@ final class BulkMoveStudentsToSectionJob implements ShouldQueue
                 Log::info('Student transferred in bulk operation', [
                     'job_id' => $this->jobId,
                     'student_id' => $transferResult['student_id'],
-                    'progress' => ++$processed . '/' . $total
+                    'progress' => ++$processed.'/'.$total,
                 ]);
 
             } catch (Exception $e) {
                 $results['failed_transfers'][] = [
                     'student_id' => $classEnrollment->student_id,
                     'student_name' => $classEnrollment->student?->full_name ?? 'Unknown',
-                    'error' => $e->getMessage()
+                    'error' => $e->getMessage(),
                 ];
                 $results['error_count']++;
 
@@ -349,7 +351,7 @@ final class BulkMoveStudentsToSectionJob implements ShouldQueue
                     'job_id' => $this->jobId,
                     'student_id' => $classEnrollment->student_id,
                     'error' => $e->getMessage(),
-                    'progress' => ++$processed . '/' . $total
+                    'progress' => ++$processed.'/'.$total,
                 ]);
             }
 
@@ -367,13 +369,13 @@ final class BulkMoveStudentsToSectionJob implements ShouldQueue
      */
     private function sendProgressNotification(int $processed, int $total, int $successCount, int $errorCount): void
     {
-        if (!$this->initiatedByUserId) {
+        if (! $this->initiatedByUserId) {
             return;
         }
 
         try {
             $user = User::find($this->initiatedByUserId);
-            if (!$user) {
+            if (! $user) {
                 return;
             }
 
@@ -402,7 +404,7 @@ final class BulkMoveStudentsToSectionJob implements ShouldQueue
         } catch (Exception $e) {
             Log::error('Failed to send progress notification', [
                 'job_id' => $this->jobId,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
         }
     }

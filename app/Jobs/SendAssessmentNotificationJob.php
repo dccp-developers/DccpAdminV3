@@ -260,10 +260,10 @@ final class SendAssessmentNotificationJob implements ShouldQueue
      */
     private function generatePdfSynchronously(): void
     {
-        $settingsService = new GeneralSettingsService();
+        $settingsService = new GeneralSettingsService;
 
         // Load additional fees relationship if not already loaded
-        if (!$this->enrollmentRecord->relationLoaded('additionalFees')) {
+        if (! $this->enrollmentRecord->relationLoaded('additionalFees')) {
             $this->enrollmentRecord->load('additionalFees');
         }
 

@@ -17,9 +17,11 @@ use Illuminate\Database\Eloquent\Model;
  * @property-read mixed $email
  * @property-read mixed $first_name
  * @property-read mixed $last_name
+ *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|PendingEnrollment newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|PendingEnrollment newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|PendingEnrollment query()
+ *
  * @mixin \Eloquent
  */
 final class PendingEnrollment extends Model

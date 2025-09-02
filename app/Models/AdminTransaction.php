@@ -8,7 +8,6 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -16,9 +15,11 @@ use Illuminate\Database\Eloquent\Model;
  *
  * @property-read \App\Models\Transaction|null $transaction
  * @property-read \App\Models\User|null $user
+ *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|AdminTransaction newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|AdminTransaction newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|AdminTransaction query()
+ *
  * @mixin \Eloquent
  */
 final class AdminTransaction extends Model

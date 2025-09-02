@@ -9,7 +9,6 @@ use App\Jobs\SendAssessmentNotificationJob;
 use App\Models\AdminTransaction;
 use App\Models\Classes;
 use App\Models\Course;
-use App\Models\EnrollmentSignature;
 use App\Models\GeneralSetting;
 use App\Models\Student;
 use App\Models\StudentEnrollment;
@@ -24,7 +23,6 @@ use App\Notifications\MigrateToStudent; // Alias Filament Action
 use App\Notifications\StudentEnrolledVerified;
 use Exception;
 use Filament\Actions\Action;
-use Filament\Notifications\Actions\Action as NotificationAction;
 use Filament\Notifications\Notification;
 use Illuminate\Support\Collection; // Use Log facade
 use Illuminate\Support\Facades\Auth;
@@ -167,9 +165,9 @@ final class EnrollmentService
 
             // Calculate additional fees total
             $additionalFeesTotal = 0;
-            if (!empty($formData['additionalFees'])) {
+            if (! empty($formData['additionalFees'])) {
                 foreach ($formData['additionalFees'] as $fee) {
-                    if (!empty($fee['amount'])) {
+                    if (! empty($fee['amount'])) {
                         $additionalFeesTotal += (float) $fee['amount'];
                     }
                 }
@@ -232,8 +230,6 @@ final class EnrollmentService
     ): bool {
         try {
             DB::beginTransaction();
-
-            
 
             // Update enrollment status
             $enrollmentRecord->status = EnrollStat::VerifiedByDeptHead->value; // Use Enum value
@@ -372,7 +368,6 @@ final class EnrollmentService
             $mainTransactionAmount = array_sum($settlements);
             $totalDownpayment = $mainTransactionAmount + $totalSeparateFeesAmount;
 
-            
             // Create Transaction
             $transaction = Transaction::create([
                 'description' => 'Downpayment for student Tuition', // Consider making this more dynamic
@@ -402,7 +397,7 @@ final class EnrollmentService
             ]);
 
             // Log separate transactions created
-            if (!empty($separateTransactions)) {
+            if (! empty($separateTransactions)) {
                 $separateTransactionNumbers = collect($separateTransactions)
                     ->pluck('transaction_number')
                     ->join(', ');
@@ -529,7 +524,7 @@ final class EnrollmentService
                 $enrollmentRecord->student?->last_name.
                 '. Main Transaction: '.$transaction->transaction_number;
 
-            if (!empty($separateTransactions)) {
+            if (! empty($separateTransactions)) {
                 $separateTransactionNumbers = collect($separateTransactions)
                     ->pluck('transaction_number')
                     ->join(', ');
@@ -692,7 +687,6 @@ final class EnrollmentService
             $enrollmentRecord->status = EnrollStat::Pending->value;
             $enrollmentRecord->save();
 
-            
             DB::commit();
 
             Notification::make()
@@ -784,7 +778,6 @@ final class EnrollmentService
             $enrollmentRecord->status = EnrollStat::VerifiedByDeptHead->value;
             $enrollmentRecord->save();
 
-           
             // IMPORTANT: We are NOT deleting transactions or reverting tuition automatically.
 
             DB::commit();

@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Models\Classes;
 use App\Models\ClassEnrollment;
+use App\Models\Classes;
 use App\Models\Student;
-use App\Models\StudentEnrollment;
 use App\Models\SubjectEnrollment;
 use Exception;
 use Illuminate\Database\Eloquent\Collection;
@@ -27,9 +26,10 @@ final class StudentSectionTransferService
     /**
      * Transfer a single student to a different section
      *
-     * @param ClassEnrollment $classEnrollment The student's current class enrollment
-     * @param int $newClassId The target class ID
+     * @param  ClassEnrollment  $classEnrollment  The student's current class enrollment
+     * @param  int  $newClassId  The target class ID
      * @return array Transfer result with success status and details
+     *
      * @throws Exception If transfer fails
      */
     public function transferStudent(ClassEnrollment $classEnrollment, int $newClassId): array
@@ -42,7 +42,7 @@ final class StudentSectionTransferService
 
         // Validate the transfer
         $validation = $this->validateTransfer($oldClassId, $newClassId, $studentId);
-        if (!$validation['valid']) {
+        if (! $validation['valid']) {
             throw new Exception($validation['message']);
         }
 
@@ -80,7 +80,7 @@ final class StudentSectionTransferService
                 'subject_code' => $oldClass->subject_code,
                 'subject_enrollment_updated' => $subjectEnrollment !== null,
                 'subject_enrollment_id' => $subjectEnrollment?->id,
-                'student_enrollment_id' => $subjectEnrollment?->student_enrollment_id
+                'student_enrollment_id' => $subjectEnrollment?->student_enrollment_id,
             ];
 
             $this->logTransferSuccess($result);
@@ -89,18 +89,18 @@ final class StudentSectionTransferService
 
         } catch (Exception $e) {
             DB::rollBack();
-            
+
             $this->logTransferError($studentId, $oldClassId, $newClassId, $e);
-            
-            throw new Exception("Failed to transfer student: " . $e->getMessage());
+
+            throw new Exception('Failed to transfer student: '.$e->getMessage());
         }
     }
 
     /**
      * Transfer multiple students to a different section
      *
-     * @param Collection $classEnrollments Collection of ClassEnrollment models
-     * @param int $newClassId The target class ID
+     * @param  Collection  $classEnrollments  Collection of ClassEnrollment models
+     * @param  int  $newClassId  The target class ID
      * @return array Bulk transfer results with success/error counts
      */
     public function transferMultipleStudents(Collection $classEnrollments, int $newClassId): array
@@ -110,7 +110,7 @@ final class StudentSectionTransferService
             'successful_transfers' => [],
             'failed_transfers' => [],
             'success_count' => 0,
-            'error_count' => 0
+            'error_count' => 0,
         ];
 
         foreach ($classEnrollments as $classEnrollment) {
@@ -122,7 +122,7 @@ final class StudentSectionTransferService
                 $results['failed_transfers'][] = [
                     'student_id' => $classEnrollment->student_id,
                     'student_name' => $classEnrollment->student?->full_name ?? 'Unknown',
-                    'error' => $e->getMessage()
+                    'error' => $e->getMessage(),
                 ];
                 $results['error_count']++;
             }
@@ -134,9 +134,9 @@ final class StudentSectionTransferService
     /**
      * Validate if a student transfer is possible
      *
-     * @param int $oldClassId Current class ID
-     * @param int $newClassId Target class ID
-     * @param int $studentId Student ID
+     * @param  int  $oldClassId  Current class ID
+     * @param  int  $newClassId  Target class ID
+     * @param  int  $studentId  Student ID
      * @return array Validation result with classes and student data
      */
     private function validateTransfer(int $oldClassId, int $newClassId, int $studentId): array
@@ -149,7 +149,7 @@ final class StudentSectionTransferService
         $oldClass = $classes->get($oldClassId);
         $newClass = $classes->get($newClassId);
 
-        if (!$oldClass || !$newClass) {
+        if (! $oldClass || ! $newClass) {
             return ['valid' => false, 'message' => 'One or both classes not found'];
         }
 
@@ -163,15 +163,15 @@ final class StudentSectionTransferService
             $currentEnrollmentCount = ClassEnrollment::where('class_id', $newClassId)->count();
             if ($currentEnrollmentCount >= $newClass->maximum_slots) {
                 return [
-                    'valid' => false, 
-                    'message' => "Target class is full (Max: {$newClass->maximum_slots}, Current: {$currentEnrollmentCount})"
+                    'valid' => false,
+                    'message' => "Target class is full (Max: {$newClass->maximum_slots}, Current: {$currentEnrollmentCount})",
                 ];
             }
         }
 
         // Get student information
         $student = Student::find($studentId);
-        if (!$student) {
+        if (! $student) {
             return ['valid' => false, 'message' => 'Student not found'];
         }
 
@@ -179,19 +179,19 @@ final class StudentSectionTransferService
             'valid' => true,
             'old_class' => $oldClass,
             'new_class' => $newClass,
-            'student' => $student
+            'student' => $student,
         ];
     }
 
     /**
      * Update the subject enrollment record for the transferred student
      *
-     * @param int $studentId Student ID
-     * @param int $oldClassId Old class ID
-     * @param int $newClassId New class ID
-     * @param string $currentSchoolYear Current school year
-     * @param int $currentSemester Current semester
-     * @param string $subjectCode Subject code
+     * @param  int  $studentId  Student ID
+     * @param  int  $oldClassId  Old class ID
+     * @param  int  $newClassId  New class ID
+     * @param  string  $currentSchoolYear  Current school year
+     * @param  int  $currentSemester  Current semester
+     * @param  string  $subjectCode  Subject code
      * @return SubjectEnrollment|null Updated subject enrollment or null if not found
      */
     private function updateSubjectEnrollment(
@@ -206,7 +206,7 @@ final class StudentSectionTransferService
             ->where('class_id', $oldClassId)
             ->where('school_year', $currentSchoolYear)
             ->where('semester', $currentSemester)
-            ->whereHas('subject', function($query) use ($subjectCode) {
+            ->whereHas('subject', function ($query) use ($subjectCode) {
                 $query->where('code', $subjectCode);
             })
             ->first();
@@ -221,7 +221,7 @@ final class StudentSectionTransferService
                 'subject_enrollment_id' => $subjectEnrollment->id,
                 'old_class_id' => $oldClassId,
                 'new_class_id' => $newClassId,
-                'subject_code' => $subjectCode
+                'subject_code' => $subjectCode,
             ]);
 
             return $subjectEnrollment;
@@ -233,7 +233,7 @@ final class StudentSectionTransferService
             'new_class_id' => $newClassId,
             'subject_code' => $subjectCode,
             'school_year' => $currentSchoolYear,
-            'semester' => $currentSemester
+            'semester' => $currentSemester,
         ]);
 
         return null;
@@ -252,7 +252,7 @@ final class StudentSectionTransferService
             'new_class_id' => $result['new_class_id'],
             'new_section' => $result['new_section'],
             'subject_code' => $result['subject_code'],
-            'subject_enrollment_updated' => $result['subject_enrollment_updated']
+            'subject_enrollment_updated' => $result['subject_enrollment_updated'],
         ]);
     }
 
@@ -266,20 +266,20 @@ final class StudentSectionTransferService
             'old_class_id' => $oldClassId,
             'new_class_id' => $newClassId,
             'error' => $e->getMessage(),
-            'trace' => $e->getTraceAsString()
+            'trace' => $e->getTraceAsString(),
         ]);
     }
 
     /**
      * Get available target classes for a student transfer
      *
-     * @param int $currentClassId Current class ID
+     * @param  int  $currentClassId  Current class ID
      * @return Collection Available classes for transfer
      */
     public function getAvailableTargetClasses(int $currentClassId): Collection
     {
         $currentClass = Classes::find($currentClassId);
-        if (!$currentClass) {
+        if (! $currentClass) {
             return collect();
         }
 
@@ -290,16 +290,17 @@ final class StudentSectionTransferService
             ->where('school_year', $currentSchoolYear)
             ->where('semester', $currentSemester)
             ->where('id', '!=', $currentClassId)
-            ->with(['class_enrollments' => function($query) {
+            ->with(['class_enrollments' => function ($query) {
                 $query->select('class_id', DB::raw('count(*) as enrollment_count'))
                     ->groupBy('class_id');
             }])
             ->get()
-            ->map(function($class) {
+            ->map(function ($class) {
                 $enrollmentCount = $class->class_enrollments->first()?->enrollment_count ?? 0;
                 $class->current_enrollment = $enrollmentCount;
                 $class->available_slots = $class->maximum_slots ? ($class->maximum_slots - $enrollmentCount) : null;
                 $class->is_full = $class->maximum_slots && $enrollmentCount >= $class->maximum_slots;
+
                 return $class;
             });
     }

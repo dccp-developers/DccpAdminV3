@@ -8,7 +8,6 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
 
@@ -18,6 +17,7 @@ use Illuminate\Support\Facades\Cache;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|GeneralSetting newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|GeneralSetting newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|GeneralSetting query()
+ *
  * @mixin \Eloquent
  */
 final class GeneralSetting extends Model

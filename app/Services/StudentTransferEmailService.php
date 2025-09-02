@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Mail\StudentSectionTransferNotification;
 use App\Mail\FacultySectionTransferNotification;
+use App\Mail\StudentSectionTransferNotification;
 use App\Models\Classes;
 use App\Models\Faculty;
 use App\Models\Student;
+use Exception;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
-use Exception;
 
 /**
  * Service class for handling email notifications related to student section transfers
@@ -26,8 +26,8 @@ final class StudentTransferEmailService
     /**
      * Send email notifications for a student section transfer
      *
-     * @param array $transferResult The result from StudentSectionTransferService::transferStudent
-     * @param bool $notifyStudent Whether to send email notification to the student
+     * @param  array  $transferResult  The result from StudentSectionTransferService::transferStudent
+     * @param  bool  $notifyStudent  Whether to send email notification to the student
      * @return array Results of email sending attempts
      */
     public function sendTransferNotifications(array $transferResult, bool $notifyStudent = true): array
@@ -44,13 +44,14 @@ final class StudentTransferEmailService
         $oldClass = Classes::with('Faculty')->find($transferResult['old_class_id']);
         $newClass = Classes::with('Faculty')->find($transferResult['new_class_id']);
 
-        if (!$student || !$oldClass || !$newClass) {
+        if (! $student || ! $oldClass || ! $newClass) {
             Log::error('Missing data for transfer email notifications', [
                 'student_found' => $student !== null,
                 'old_class_found' => $oldClass !== null,
                 'new_class_found' => $newClass !== null,
-                'transfer_result' => $transferResult
+                'transfer_result' => $transferResult,
             ]);
+
             return $results;
         }
 
@@ -60,7 +61,7 @@ final class StudentTransferEmailService
         } else {
             Log::info('Student email notification skipped by request', [
                 'student_id' => $student->id,
-                'student_name' => $student->full_name
+                'student_name' => $student->full_name,
             ]);
         }
 
@@ -75,10 +76,10 @@ final class StudentTransferEmailService
     /**
      * Send email notification to the student about their section transfer
      *
-     * @param Student $student The student being transferred
-     * @param Classes $oldClass The class they're being moved from
-     * @param Classes $newClass The class they're being moved to
-     * @param array $transferResult The transfer result data
+     * @param  Student  $student  The student being transferred
+     * @param  Classes  $oldClass  The class they're being moved from
+     * @param  Classes  $newClass  The class they're being moved to
+     * @param  array  $transferResult  The transfer result data
      * @return bool Whether the email was sent successfully
      */
     private function sendStudentNotification(Student $student, Classes $oldClass, Classes $newClass, array $transferResult): bool
@@ -88,8 +89,9 @@ final class StudentTransferEmailService
             if (empty($student->email)) {
                 Log::warning('Student has no email address for transfer notification', [
                     'student_id' => $student->id,
-                    'student_name' => $student->full_name
+                    'student_name' => $student->full_name,
                 ]);
+
                 return false;
             }
 
@@ -116,7 +118,7 @@ final class StudentTransferEmailService
                 'student_email' => $student->email,
                 'subject_code' => $transferResult['subject_code'],
                 'old_section' => $transferResult['old_section'],
-                'new_section' => $transferResult['new_section']
+                'new_section' => $transferResult['new_section'],
             ]);
 
             return true;
@@ -126,7 +128,7 @@ final class StudentTransferEmailService
                 'student_id' => $student->id,
                 'student_email' => $student->email ?? 'N/A',
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
 
             return false;
@@ -136,11 +138,11 @@ final class StudentTransferEmailService
     /**
      * Send email notification to faculty about a student transfer to their class
      *
-     * @param Faculty $faculty The faculty member assigned to the destination class
-     * @param Student $student The student being transferred
-     * @param Classes $oldClass The class they're being moved from
-     * @param Classes $newClass The class they're being moved to
-     * @param array $transferResult The transfer result data
+     * @param  Faculty  $faculty  The faculty member assigned to the destination class
+     * @param  Student  $student  The student being transferred
+     * @param  Classes  $oldClass  The class they're being moved from
+     * @param  Classes  $newClass  The class they're being moved to
+     * @param  array  $transferResult  The transfer result data
      * @return bool Whether the email was sent successfully
      */
     private function sendFacultyNotification(Faculty $faculty, Student $student, Classes $oldClass, Classes $newClass, array $transferResult): bool
@@ -150,8 +152,9 @@ final class StudentTransferEmailService
             if (empty($faculty->email)) {
                 Log::warning('Faculty has no email address for transfer notification', [
                     'faculty_id' => $faculty->id,
-                    'faculty_name' => $faculty->full_name
+                    'faculty_name' => $faculty->full_name,
                 ]);
+
                 return false;
             }
 
@@ -178,7 +181,7 @@ final class StudentTransferEmailService
                 'faculty_email' => $faculty->email,
                 'student_id' => $student->id,
                 'subject_code' => $transferResult['subject_code'],
-                'new_section' => $transferResult['new_section']
+                'new_section' => $transferResult['new_section'],
             ]);
 
             return true;
@@ -189,7 +192,7 @@ final class StudentTransferEmailService
                 'faculty_email' => $faculty->email ?? 'N/A',
                 'student_id' => $student->id,
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
 
             return false;
@@ -199,9 +202,9 @@ final class StudentTransferEmailService
     /**
      * Send consolidated email notifications for bulk student transfers
      *
-     * @param array $bulkTransferResults Results from StudentSectionTransferService::transferMultipleStudents
-     * @param int $targetClassId The target class ID for all transfers
-     * @param bool $notifyStudents Whether to send email notifications to students
+     * @param  array  $bulkTransferResults  Results from StudentSectionTransferService::transferMultipleStudents
+     * @param  int  $targetClassId  The target class ID for all transfers
+     * @param  bool  $notifyStudents  Whether to send email notifications to students
      * @return array Results of email sending attempts
      */
     public function sendBulkTransferNotifications(array $bulkTransferResults, int $targetClassId, bool $notifyStudents = true): array
@@ -215,8 +218,9 @@ final class StudentTransferEmailService
 
         // Get the target class
         $targetClass = Classes::with('Faculty')->find($targetClassId);
-        if (!$targetClass) {
+        if (! $targetClass) {
             Log::error('Target class not found for bulk transfer notifications', ['class_id' => $targetClassId]);
+
             return $results;
         }
 
@@ -233,7 +237,7 @@ final class StudentTransferEmailService
                         $results['student_email_errors'][] = [
                             'student_id' => $student->id,
                             'student_name' => $student->full_name,
-                            'error' => 'Failed to send email'
+                            'error' => 'Failed to send email',
                         ];
                     }
                 }
@@ -241,12 +245,12 @@ final class StudentTransferEmailService
         } else {
             Log::info('Student email notifications skipped for bulk transfer by request', [
                 'target_class_id' => $targetClassId,
-                'student_count' => count($bulkTransferResults['successful_transfers'])
+                'student_count' => count($bulkTransferResults['successful_transfers']),
             ]);
         }
 
         // Send consolidated faculty notification if faculty is assigned
-        if ($targetClass->Faculty && !empty($bulkTransferResults['successful_transfers'])) {
+        if ($targetClass->Faculty && ! empty($bulkTransferResults['successful_transfers'])) {
             $results['faculty_email_sent'] = $this->sendBulkFacultyNotification(
                 $targetClass->Faculty,
                 $bulkTransferResults['successful_transfers'],
@@ -260,9 +264,9 @@ final class StudentTransferEmailService
     /**
      * Send consolidated faculty notification for bulk transfers
      *
-     * @param Faculty $faculty The faculty member
-     * @param array $successfulTransfers Array of successful transfer results
-     * @param Classes $targetClass The target class
+     * @param  Faculty  $faculty  The faculty member
+     * @param  array  $successfulTransfers  Array of successful transfer results
+     * @param  Classes  $targetClass  The target class
      * @return bool Whether the email was sent successfully
      */
     private function sendBulkFacultyNotification(Faculty $faculty, array $successfulTransfers, Classes $targetClass): bool
@@ -271,8 +275,9 @@ final class StudentTransferEmailService
             if (empty($faculty->email)) {
                 Log::warning('Faculty has no email address for bulk transfer notification', [
                     'faculty_id' => $faculty->id,
-                    'faculty_name' => $faculty->full_name
+                    'faculty_name' => $faculty->full_name,
                 ]);
+
                 return false;
             }
 
@@ -309,7 +314,7 @@ final class StudentTransferEmailService
                 'faculty_id' => $faculty->id,
                 'faculty_email' => $faculty->email,
                 'student_count' => count($students),
-                'target_class_id' => $targetClass->id
+                'target_class_id' => $targetClass->id,
             ]);
 
             return true;
@@ -320,7 +325,7 @@ final class StudentTransferEmailService
                 'faculty_email' => $faculty->email ?? 'N/A',
                 'target_class_id' => $targetClass->id,
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
 
             return false;

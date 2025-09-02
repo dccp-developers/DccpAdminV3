@@ -8,7 +8,6 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -17,6 +16,7 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|DocumentLocation newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|DocumentLocation newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|DocumentLocation query()
+ *
  * @mixin \Eloquent
  */
 final class DocumentLocation extends Model

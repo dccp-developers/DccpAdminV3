@@ -8,7 +8,6 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 
@@ -30,6 +29,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property-read int|null $student_count
  * @property-read Collection<int, \App\Models\StudentTransaction> $studentTransactions
  * @property-read int|null $student_transactions_count
+ *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Transaction dateRange($startDate = null, $endDate = null)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Transaction forAcademicPeriod(string $schoolYear, int $semester)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Transaction newModelQuery()
@@ -37,6 +37,7 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Transaction query()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Transaction sort($field = 'created_at', $direction = 'desc')
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Transaction status($status = null)
+ *
  * @mixin \Eloquent
  */
 final class Transaction extends Model
@@ -228,16 +229,16 @@ final class Transaction extends Model
         if ($month >= 8 && $month <= 12) {
             // First semester (August to December)
             $semester = 1;
-            $schoolYear = $year . '-' . ($year + 1);
+            $schoolYear = $year.'-'.($year + 1);
         } else {
             // Second semester (January to July)
             $semester = 2;
-            $schoolYear = ($year - 1) . '-' . $year;
+            $schoolYear = ($year - 1).'-'.$year;
         }
 
         return [
             'school_year' => $schoolYear,
-            'semester' => $semester
+            'semester' => $semester,
         ];
     }
 

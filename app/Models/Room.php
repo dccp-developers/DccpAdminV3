@@ -8,7 +8,6 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -18,9 +17,11 @@ use Illuminate\Database\Eloquent\Model;
  * @property-read int|null $classes_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Schedule> $schedules
  * @property-read int|null $schedules_count
+ *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Room newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Room newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Room query()
+ *
  * @mixin \Eloquent
  */
 final class Room extends Model

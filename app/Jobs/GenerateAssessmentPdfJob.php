@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace App\Jobs;
 
 use App\Models\StudentEnrollment;
+use App\Models\User;
+use App\Notifications\PdfGenerationCompleted;
 use App\Services\BrowsershotService;
 use App\Services\GeneralSettingsService;
 use Exception;
-use App\Models\User;
-use App\Notifications\PdfGenerationCompleted;
 use Filament\Notifications\Notification;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -156,7 +156,7 @@ final class GenerateAssessmentPdfJob implements ShouldQueue
      */
     private function generatePdf(): string
     {
-        $settingsService = new GeneralSettingsService();
+        $settingsService = new GeneralSettingsService;
 
         // Prepare data for the view
         $data = [
@@ -241,7 +241,7 @@ final class GenerateAssessmentPdfJob implements ShouldQueue
      */
     private function saveResourceRecord(string $pdfPath): void
     {
-        $settingsService = new GeneralSettingsService();
+        $settingsService = new GeneralSettingsService;
         $filename = basename($pdfPath);
 
         // Try to upload to public storage (Supabase) but don't fail if it doesn't work
@@ -363,6 +363,7 @@ final class GenerateAssessmentPdfJob implements ShouldQueue
                     'job_id' => $this->jobId,
                     'enrollment_id' => $this->enrollmentRecord->id,
                 ]);
+
                 return;
             }
 

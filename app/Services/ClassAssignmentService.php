@@ -28,9 +28,9 @@ final class ClassAssignmentService
     {
         $type = $class->isShs() ? 'SHS' : 'College';
         $info = $class->isShs() ? $class->formatted_track_strand : $class->formatted_course_codes;
-        
+
         $label = "[{$class->subject_code}] {$class->subject_title} - {$class->section} ({$type})";
-        
+
         if ($info && $info !== 'N/A') {
             $label .= " - {$info}";
         }
@@ -57,7 +57,7 @@ final class ClassAssignmentService
         }
 
         $facultyCount = $facultyMembers->count();
-        
+
         foreach ($classIds as $index => $classId) {
             $facultyIndex = $index % $facultyCount;
             $facultyId = (string) $facultyMembers[$facultyIndex]['id'];
@@ -78,7 +78,7 @@ final class ClassAssignmentService
     {
         $count = $classes->count();
         $classes->each(fn ($record) => $record->update(['faculty_id' => null]));
-        
+
         return $count;
     }
 }

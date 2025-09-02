@@ -8,9 +8,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 /**
  * @property-read string $filters_display
  * @property-read \App\Models\User|null $user
+ *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ExportJob newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ExportJob newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ExportJob query()
+ *
  * @mixin \Eloquent
  */
 class ExportJob extends Model
@@ -73,11 +75,11 @@ class ExportJob extends Model
         $display = [];
 
         if (isset($filters['course_filter']) && $filters['course_filter'] !== 'all') {
-            $display[] = 'Course: ' . $filters['course_filter'];
+            $display[] = 'Course: '.$filters['course_filter'];
         }
 
         if (isset($filters['year_level_filter']) && $filters['year_level_filter'] !== 'all') {
-            $display[] = 'Year: ' . $filters['year_level_filter'];
+            $display[] = 'Year: '.$filters['year_level_filter'];
         }
 
         return empty($display) ? 'All Students' : implode(', ', $display);

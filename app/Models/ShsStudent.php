@@ -8,7 +8,6 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -19,9 +18,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property-read \App\Models\Account|null $account
  * @property-read \App\Models\ShsStrand|null $strand
  * @property-read \App\Models\ShsTrack|null $track
+ *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ShsStudent newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ShsStudent newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ShsStudent query()
+ *
  * @mixin \Eloquent
  */
 final class ShsStudent extends Model

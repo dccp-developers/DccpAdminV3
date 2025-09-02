@@ -19,9 +19,9 @@ final class StudentIdUpdateService
     /**
      * Update a student's ID and all related records
      *
-     * @param Student $student The student to update
-     * @param int $newId The new ID to assign
-     * @param bool $bypassSafetyChecks Whether to bypass safety checks (when user has confirmed)
+     * @param  Student  $student  The student to update
+     * @param  int  $newId  The new ID to assign
+     * @param  bool  $bypassSafetyChecks  Whether to bypass safety checks (when user has confirmed)
      * @return array Result array with success status and message
      */
     public function updateStudentId(Student $student, int $newId, bool $bypassSafetyChecks = false): array
@@ -33,7 +33,7 @@ final class StudentIdUpdateService
         }
 
         // Additional safety checks (only if not bypassed)
-        if (!$bypassSafetyChecks) {
+        if (! $bypassSafetyChecks) {
             $safetyCheck = $this->performSafetyChecks($student, $newId);
             if ($safetyCheck !== true) {
                 return $safetyCheck;
@@ -44,7 +44,7 @@ final class StudentIdUpdateService
 
         // Pre-update verification
         $preUpdateVerification = $this->verifyPreUpdateState($student);
-        if (!$preUpdateVerification['success']) {
+        if (! $preUpdateVerification['success']) {
             return $preUpdateVerification;
         }
 
@@ -54,8 +54,9 @@ final class StudentIdUpdateService
             // Perform the ID update
             $updateResult = $this->performIdUpdate($student, $newId, 'Student ID update via admin interface');
 
-            if (!$updateResult['success']) {
+            if (! $updateResult['success']) {
                 DB::rollBack();
+
                 return $updateResult;
             }
 
@@ -80,13 +81,13 @@ final class StudentIdUpdateService
             // Calculate total updated records
             $totalUpdated = $updateResults['total_updated'];
 
-            Log::info("Student ID updated successfully", [
+            Log::info('Student ID updated successfully', [
                 'old_id' => $oldId,
                 'new_id' => $newId,
                 'student_name' => $student->full_name,
                 'updated_records' => $updateResults,
                 'total_updated' => $totalUpdated,
-                'change_log_id' => $changeLog->id
+                'change_log_id' => $changeLog->id,
             ]);
 
             return [
@@ -95,33 +96,29 @@ final class StudentIdUpdateService
                 'old_id' => $oldId,
                 'new_id' => $newId,
                 'updated_records' => $updateResults,
-                'change_log_id' => $changeLog->id
+                'change_log_id' => $changeLog->id,
             ];
 
         } catch (\Exception $e) {
             DB::rollBack();
 
-            Log::error("Failed to update student ID", [
+            Log::error('Failed to update student ID', [
                 'old_id' => $oldId,
                 'new_id' => $newId,
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
 
             return [
                 'success' => false,
-                'message' => "Failed to update student ID: " . $e->getMessage(),
-                'error' => $e->getMessage()
+                'message' => 'Failed to update student ID: '.$e->getMessage(),
+                'error' => $e->getMessage(),
             ];
         }
     }
 
     /**
      * Validate the new ID
-     *
-     * @param Student $student
-     * @param int $newId
-     * @return array|true
      */
     private function validateNewId(Student $student, int $newId): array|true
     {
@@ -129,7 +126,7 @@ final class StudentIdUpdateService
         if ($student->id === $newId) {
             return [
                 'success' => false,
-                'message' => 'New ID cannot be the same as the current ID'
+                'message' => 'New ID cannot be the same as the current ID',
             ];
         }
 
@@ -137,7 +134,7 @@ final class StudentIdUpdateService
         if (Student::where('id', $newId)->exists()) {
             return [
                 'success' => false,
-                'message' => "Student ID {$newId} already exists"
+                'message' => "Student ID {$newId} already exists",
             ];
         }
 
@@ -145,7 +142,7 @@ final class StudentIdUpdateService
         if ($newId <= 0) {
             return [
                 'success' => false,
-                'message' => 'Student ID must be a positive integer'
+                'message' => 'Student ID must be a positive integer',
             ];
         }
 
@@ -154,10 +151,6 @@ final class StudentIdUpdateService
 
     /**
      * Perform additional safety checks before updating
-     *
-     * @param Student $student
-     * @param int $newId
-     * @return array|true
      */
     private function performSafetyChecks(Student $student, int $newId): array|true
     {
@@ -166,7 +159,7 @@ final class StudentIdUpdateService
         if ($activeEnrollments > 5) {
             return [
                 'success' => false,
-                'message' => "Student has {$activeEnrollments} active enrollments. This is a high-risk operation. Please confirm in the form to proceed."
+                'message' => "Student has {$activeEnrollments} active enrollments. This is a high-risk operation. Please confirm in the form to proceed.",
             ];
         }
 
@@ -178,7 +171,7 @@ final class StudentIdUpdateService
         if ($recentTransactions > 3) {
             return [
                 'success' => false,
-                'message' => "Student has {$recentTransactions} recent transactions. Changing ID may affect financial records. Please confirm in the form to proceed."
+                'message' => "Student has {$recentTransactions} recent transactions. Changing ID may affect financial records. Please confirm in the form to proceed.",
             ];
         }
 
@@ -186,7 +179,7 @@ final class StudentIdUpdateService
         if ($newId < 100000 || $newId > 9999999) {
             return [
                 'success' => false,
-                'message' => "New ID {$newId} doesn't follow institutional ID patterns (should be 6-7 digits). Please verify this is correct."
+                'message' => "New ID {$newId} doesn't follow institutional ID patterns (should be 6-7 digits). Please verify this is correct.",
             ];
         }
 
@@ -195,17 +188,14 @@ final class StudentIdUpdateService
 
     /**
      * Verify the state before updating
-     *
-     * @param Student $student
-     * @return array
      */
     private function verifyPreUpdateState(Student $student): array
     {
         // Verify student exists and is accessible
-        if (!$student->exists) {
+        if (! $student->exists) {
             return [
                 'success' => false,
-                'message' => 'Student record does not exist or is not accessible.'
+                'message' => 'Student record does not exist or is not accessible.',
             ];
         }
 
@@ -213,31 +203,27 @@ final class StudentIdUpdateService
         if ($student->trashed()) {
             return [
                 'success' => false,
-                'message' => 'Cannot update ID of a deleted student record.'
+                'message' => 'Cannot update ID of a deleted student record.',
             ];
         }
 
         return [
             'success' => true,
-            'message' => 'Pre-update verification passed.'
+            'message' => 'Pre-update verification passed.',
         ];
     }
 
     /**
      * Verify the state after updating
-     *
-     * @param int $oldId
-     * @param int $newId
-     * @return array
      */
     private function verifyPostUpdateState(int $oldId, int $newId): array
     {
         // Verify the student record was updated
         $updatedStudent = Student::find($newId);
-        if (!$updatedStudent) {
+        if (! $updatedStudent) {
             return [
                 'success' => false,
-                'message' => 'Student record with new ID was not found after update.'
+                'message' => 'Student record with new ID was not found after update.',
             ];
         }
 
@@ -246,7 +232,7 @@ final class StudentIdUpdateService
         if ($oldStudent) {
             return [
                 'success' => false,
-                'message' => 'Old student ID still exists after update. Data integrity compromised.'
+                'message' => 'Old student ID still exists after update. Data integrity compromised.',
             ];
         }
 
@@ -257,26 +243,18 @@ final class StudentIdUpdateService
         if ($totalOldReferences > 0) {
             return [
                 'success' => false,
-                'message' => "Found {$totalOldReferences} records still referencing old ID {$oldId}. Update incomplete."
+                'message' => "Found {$totalOldReferences} records still referencing old ID {$oldId}. Update incomplete.",
             ];
         }
 
         return [
             'success' => true,
-            'message' => 'Post-update verification passed.'
+            'message' => 'Post-update verification passed.',
         ];
     }
 
-
-
-
-
     /**
      * Update all related records manually
-     *
-     * @param int $oldId
-     * @param int $newId
-     * @return array
      */
     private function updateRelatedRecordsManually(int $oldId, int $newId): array
     {
@@ -312,7 +290,7 @@ final class StudentIdUpdateService
                 ->update(['student_id' => $newId]);
         } catch (\Exception $e) {
             // Table might not exist, log but don't fail
-            Log::warning("Could not update student_clearances table: " . $e->getMessage());
+            Log::warning('Could not update student_clearances table: '.$e->getMessage());
             $results['student_clearances'] = 0;
         }
 
@@ -323,15 +301,12 @@ final class StudentIdUpdateService
 
     /**
      * Get a summary of records that will be affected by the ID change
-     *
-     * @param int|string $studentId
-     * @return array
      */
     public function getAffectedRecordsSummary(int|string $studentId): array
     {
         // Convert to integer if it's a valid numeric string
         if (is_string($studentId)) {
-            if (!is_numeric($studentId)) {
+            if (! is_numeric($studentId)) {
                 return []; // Invalid ID format, return empty array
             }
             $studentId = (int) $studentId;
@@ -357,16 +332,16 @@ final class StudentIdUpdateService
             'student_documents',
             'student_payments',
             'student_fees',
-            'student_records'
+            'student_records',
         ];
 
         foreach ($additionalTables as $table) {
             try {
                 // Check if table exists and has student_id column
                 $exists = DB::select("SELECT 1 FROM information_schema.tables WHERE table_name = ? AND table_schema = 'public'", [$table]);
-                if (!empty($exists)) {
+                if (! empty($exists)) {
                     $hasColumn = DB::select("SELECT 1 FROM information_schema.columns WHERE table_name = ? AND column_name = 'student_id' AND table_schema = 'public'", [$table]);
-                    if (!empty($hasColumn)) {
+                    if (! empty($hasColumn)) {
                         $count = DB::table($table)->where('student_id', $studentId)->count();
                         if ($count > 0) {
                             $summary[$table] = $count;
@@ -375,7 +350,7 @@ final class StudentIdUpdateService
                 }
             } catch (\Exception $e) {
                 // Log but don't fail - table might not exist
-                Log::warning("Could not count records in table {$table}: " . $e->getMessage());
+                Log::warning("Could not count records in table {$table}: ".$e->getMessage());
             }
         }
 
@@ -384,56 +359,52 @@ final class StudentIdUpdateService
 
     /**
      * Check if a student ID is available
-     *
-     * @param int|string $id
-     * @return bool
      */
     public function isIdAvailable(int|string $id): bool
     {
         // Convert to integer if it's a valid numeric string
         if (is_string($id)) {
-            if (!is_numeric($id)) {
+            if (! is_numeric($id)) {
                 return false; // Invalid ID format
             }
             $id = (int) $id;
         }
 
-        return !Student::where('id', $id)->exists();
+        return ! Student::where('id', $id)->exists();
     }
 
     /**
      * Generate a suggested new ID based on existing patterns
-     *
-     * @return int
      */
     public function generateSuggestedId(): int
     {
         // Get the highest existing ID and add 1
         $maxId = Student::max('id') ?? 0;
+
         return $maxId + 1;
     }
 
     /**
      * Undo a student ID change
      *
-     * @param int $changeLogId The ID of the change log entry
+     * @param  int  $changeLogId  The ID of the change log entry
      * @return array Result array with success status and message
      */
     public function undoStudentIdChange(int $changeLogId): array
     {
         $changeLog = StudentIdChangeLog::find($changeLogId);
 
-        if (!$changeLog) {
+        if (! $changeLog) {
             return [
                 'success' => false,
-                'message' => 'Change log not found'
+                'message' => 'Change log not found',
             ];
         }
 
         if ($changeLog->is_undone) {
             return [
                 'success' => false,
-                'message' => 'This change has already been undone'
+                'message' => 'This change has already been undone',
             ];
         }
 
@@ -441,19 +412,19 @@ final class StudentIdUpdateService
         $newId = $changeLog->old_student_id; // Original ID (what we want to change back to)
 
         // Check if the original ID is now available
-        if (!$this->isIdAvailable((int) $newId)) {
+        if (! $this->isIdAvailable((int) $newId)) {
             return [
                 'success' => false,
-                'message' => "Cannot undo: Original student ID {$newId} is now taken by another student"
+                'message' => "Cannot undo: Original student ID {$newId} is now taken by another student",
             ];
         }
 
         // Find the current student
         $student = Student::find($oldId);
-        if (!$student) {
+        if (! $student) {
             return [
                 'success' => false,
-                'message' => "Cannot undo: Student with ID {$oldId} not found"
+                'message' => "Cannot undo: Student with ID {$oldId} not found",
             ];
         }
 
@@ -463,8 +434,9 @@ final class StudentIdUpdateService
             // Perform the reverse update
             $result = $this->performIdUpdate($student, (int) $newId, "Undo of change #{$changeLogId}");
 
-            if (!$result['success']) {
+            if (! $result['success']) {
                 DB::rollBack();
+
                 return $result;
             }
 
@@ -477,11 +449,11 @@ final class StudentIdUpdateService
 
             DB::commit();
 
-            Log::info("Student ID change undone successfully", [
+            Log::info('Student ID change undone successfully', [
                 'change_log_id' => $changeLogId,
                 'reverted_from' => $oldId,
                 'reverted_to' => $newId,
-                'undone_by' => Auth::user()?->email ?? 'System'
+                'undone_by' => Auth::user()?->email ?? 'System',
             ]);
 
             return [
@@ -489,22 +461,22 @@ final class StudentIdUpdateService
                 'message' => "Successfully undone student ID change. Reverted from {$oldId} back to {$newId}.",
                 'old_id' => $oldId,
                 'new_id' => $newId,
-                'change_log_id' => $changeLogId
+                'change_log_id' => $changeLogId,
             ];
 
         } catch (\Exception $e) {
             DB::rollBack();
 
-            Log::error("Failed to undo student ID change", [
+            Log::error('Failed to undo student ID change', [
                 'change_log_id' => $changeLogId,
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
 
             return [
                 'success' => false,
-                'message' => "Failed to undo student ID change: " . $e->getMessage(),
-                'error' => $e->getMessage()
+                'message' => 'Failed to undo student ID change: '.$e->getMessage(),
+                'error' => $e->getMessage(),
             ];
         }
     }
@@ -532,26 +504,25 @@ final class StudentIdUpdateService
 
         // Verify the update was successful
         $updatedStudent = Student::find($newId);
-        if (!$updatedStudent) {
+        if (! $updatedStudent) {
             throw new \Exception("Failed to find student with new ID {$newId} after update");
         }
 
         // Post-update verification
         $postUpdateVerification = $this->verifyPostUpdateState($oldId, $newId);
-        if (!$postUpdateVerification['success']) {
+        if (! $postUpdateVerification['success']) {
             throw new \Exception($postUpdateVerification['message']);
         }
 
         return [
             'success' => true,
-            'updated_records' => $updateResults
+            'updated_records' => $updateResults,
         ];
     }
 
     /**
      * Get recent student ID changes that can be undone
      *
-     * @param int $limit
      * @return \Illuminate\Database\Eloquent\Collection
      */
     public function getRecentChanges(int $limit = 10)
@@ -565,7 +536,7 @@ final class StudentIdUpdateService
     /**
      * Get change log for a specific student
      *
-     * @param int|string $studentId
+     * @param  int|string  $studentId
      * @return \Illuminate\Database\Eloquent\Collection
      */
     public function getStudentChangeHistory($studentId)
@@ -579,10 +550,7 @@ final class StudentIdUpdateService
     /**
      * Perform a dry run to check what would be updated
      *
-     * @param Student $student
-     * @param int $newId
-     * @param bool $bypassSafetyChecks Whether to bypass safety checks
-     * @return array
+     * @param  bool  $bypassSafetyChecks  Whether to bypass safety checks
      */
     public function dryRun(Student $student, int $newId, bool $bypassSafetyChecks = false): array
     {
@@ -592,7 +560,7 @@ final class StudentIdUpdateService
         }
 
         // Check safety only if not bypassed
-        if (!$bypassSafetyChecks) {
+        if (! $bypassSafetyChecks) {
             $safetyCheck = $this->performSafetyChecks($student, $newId);
             if ($safetyCheck !== true) {
                 return $safetyCheck;
@@ -608,7 +576,7 @@ final class StudentIdUpdateService
             'affected_records' => $summary,
             'total_records' => $totalRecords,
             'old_id' => $student->id,
-            'new_id' => $newId
+            'new_id' => $newId,
         ];
     }
 }

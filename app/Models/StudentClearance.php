@@ -10,9 +10,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 /**
  * @property-read string $formatted_semester
  * @property-read \App\Models\Student|null $student
+ *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|StudentClearance newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|StudentClearance newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|StudentClearance query()
+ *
  * @mixin \Eloquent
  */
 final class StudentClearance extends Model

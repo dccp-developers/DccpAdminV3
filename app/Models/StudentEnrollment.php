@@ -9,7 +9,6 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Services\GeneralSettingsService;
-use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -37,6 +36,7 @@ use Illuminate\Support\Facades\Storage;
  * @property-read \App\Models\StudentTuition|null $studentTuition
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\SubjectEnrollment> $subjectsEnrolled
  * @property-read int|null $subjects_enrolled_count
+ *
  * @method static Builder<static>|StudentEnrollment currentAcademicPeriod()
  * @method static Builder<static>|StudentEnrollment newModelQuery()
  * @method static Builder<static>|StudentEnrollment newQuery()
@@ -44,37 +44,38 @@ use Illuminate\Support\Facades\Storage;
  * @method static Builder<static>|StudentEnrollment query()
  * @method static Builder<static>|StudentEnrollment withTrashed(bool $withTrashed = true)
  * @method static Builder<static>|StudentEnrollment withoutTrashed()
+ *
  * @mixin \Eloquent
  */
 final class StudentEnrollment extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $table = "student_enrollment";
+    protected $table = 'student_enrollment';
 
     protected $fillable = [
-        "student_id",
-        "course_id",
-        "status",
-        "semester",
-        "academic_year",
-        "school_year",
-        "downpayment",
-        "remarks",
+        'student_id',
+        'course_id',
+        'status',
+        'semester',
+        'academic_year',
+        'school_year',
+        'downpayment',
+        'remarks',
     ];
 
     protected $casts = [
-        "id" => "integer",
-        "student_id" => "string", // Explicitly cast to string for consistency
-        "semester" => "integer",
-        "academic_year" => "integer",
-        "downpayment" => "float",
-        "created_at" => "datetime",
-        "updated_at" => "datetime",
-        "deleted_at" => "datetime",
+        'id' => 'integer',
+        'student_id' => 'string', // Explicitly cast to string for consistency
+        'semester' => 'integer',
+        'academic_year' => 'integer',
+        'downpayment' => 'float',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+        'deleted_at' => 'datetime',
     ];
 
-    private array $dates = ["deleted_at"];
+    private array $dates = ['deleted_at'];
 
     public static function boot(): void
     {
@@ -82,7 +83,7 @@ final class StudentEnrollment extends Model
 
         self::creating(function (self $model): void {
             $settings = GeneralSetting::first();
-            $model->status = "Pending";
+            $model->status = 'Pending';
             $model->school_year = $settings->getSchoolYearString();
             $model->semester = $settings->semester;
         });
@@ -96,12 +97,12 @@ final class StudentEnrollment extends Model
 
     public function signature()
     {
-        return $this->morphOne(EnrollmentSignature::class, "enrollment");
+        return $this->morphOne(EnrollmentSignature::class, 'enrollment');
     }
 
     public function student()
     {
-        return $this->belongsTo(Student::class, "student_id", "id")
+        return $this->belongsTo(Student::class, 'student_id', 'id')
             ->withoutGlobalScopes()
             ->withDefault();
     }
@@ -118,17 +119,17 @@ final class StudentEnrollment extends Model
 
     public function subjectsEnrolled()
     {
-        return $this->hasMany(SubjectEnrollment::class, "enrollment_id", "id");
+        return $this->hasMany(SubjectEnrollment::class, 'enrollment_id', 'id');
     }
 
     public function studentTuition()
     {
-        return $this->hasOne(StudentTuition::class, "enrollment_id", "id");
+        return $this->hasOne(StudentTuition::class, 'enrollment_id', 'id');
     }
 
     public function resources()
     {
-        return $this->morphMany(Resource::class, "resourceable");
+        return $this->morphMany(Resource::class, 'resourceable');
     }
 
     public function additionalFees()
@@ -143,11 +144,11 @@ final class StudentEnrollment extends Model
     public function enrollmentTransactions()
     {
         // Get the actual school calendar dates
-        $generalSettingsService = new GeneralSettingsService();
+        $generalSettingsService = new GeneralSettingsService;
         $schoolStartingDate = $generalSettingsService->getGlobalSchoolStartingDate();
         $schoolEndingDate = $generalSettingsService->getGlobalSchoolEndingDate();
 
-        if (!$schoolStartingDate || !$schoolEndingDate) {
+        if (! $schoolStartingDate || ! $schoolEndingDate) {
             // If no school dates are set, show all transactions
             return $this->student->Transaction()->orderBy('transactions.created_at', 'desc');
         }
@@ -168,11 +169,11 @@ final class StudentEnrollment extends Model
     public function enrollmentStudentTransactions()
     {
         // Use the same logic as enrollmentTransactions
-        $generalSettingsService = new GeneralSettingsService();
+        $generalSettingsService = new GeneralSettingsService;
         $schoolStartingDate = $generalSettingsService->getGlobalSchoolStartingDate();
         $schoolEndingDate = $generalSettingsService->getGlobalSchoolEndingDate();
 
-        if (!$schoolStartingDate || !$schoolEndingDate) {
+        if (! $schoolStartingDate || ! $schoolEndingDate) {
             // If no school dates are set, show all transactions
             return $this->student->StudentTransactions()->orderBy('student_transactions.created_at', 'desc');
         }
@@ -193,7 +194,7 @@ final class StudentEnrollment extends Model
      */
     private function getCurrentAcademicPeriodStartDate(): string
     {
-        $generalSettingsService = new GeneralSettingsService();
+        $generalSettingsService = new GeneralSettingsService;
         $schoolStartingDate = $generalSettingsService->getGlobalSchoolStartingDate();
 
         if ($schoolStartingDate) {
@@ -202,10 +203,11 @@ final class StudentEnrollment extends Model
             $startMonth = $schoolStartingDate->month;
             $startDay = $schoolStartingDate->day;
 
-            return sprintf("%d-%02d-%02d 00:00:00", $currentYear, $startMonth, $startDay);
+            return sprintf('%d-%02d-%02d 00:00:00', $currentYear, $startMonth, $startDay);
         } else {
             // Fallback to August 1st of current academic year
             $currentYear = $generalSettingsService->getCurrentSchoolYearStart();
+
             return "{$currentYear}-08-01 00:00:00";
         }
     }
@@ -230,7 +232,7 @@ final class StudentEnrollment extends Model
         $endYear = (int) $years[1];
 
         // Get the actual school starting date from GeneralSettings
-        $generalSettingsService = new GeneralSettingsService();
+        $generalSettingsService = new GeneralSettingsService;
         $schoolStartingDate = $generalSettingsService->getGlobalSchoolStartingDate();
 
         if ($schoolStartingDate) {
@@ -240,7 +242,7 @@ final class StudentEnrollment extends Model
 
             if ($semester == 1) {
                 // First semester starts on the school starting date
-                return sprintf("%d-%02d-%02d 00:00:00", $startYear, $startMonth, $startDay);
+                return sprintf('%d-%02d-%02d 00:00:00', $startYear, $startMonth, $startDay);
             } else {
                 // Second semester - calculate based on school calendar
                 // Typically starts in January after the first semester ends
@@ -276,7 +278,7 @@ final class StudentEnrollment extends Model
         $endYear = (int) $years[1];
 
         // Get the actual school ending date from GeneralSettings
-        $generalSettingsService = new GeneralSettingsService();
+        $generalSettingsService = new GeneralSettingsService;
         $schoolEndingDate = $generalSettingsService->getGlobalSchoolEndingDate();
 
         if ($schoolEndingDate) {
@@ -290,7 +292,7 @@ final class StudentEnrollment extends Model
                 return "{$startYear}-12-31 23:59:59";
             } else {
                 // Second semester ends on the school ending date
-                return sprintf("%d-%02d-%02d 23:59:59", $endYear, $endMonth, $endDay);
+                return sprintf('%d-%02d-%02d 23:59:59', $endYear, $endMonth, $endDay);
             }
         } else {
             // Fallback to default dates if no school ending date is set
@@ -304,6 +306,7 @@ final class StudentEnrollment extends Model
 
     /**
      * Get transactions for this enrollment through the student (legacy method)
+     *
      * @deprecated Use enrollmentTransactions() instead
      */
     public function transactions()
@@ -313,6 +316,7 @@ final class StudentEnrollment extends Model
 
     /**
      * Get student transactions for this enrollment through the student (legacy method)
+     *
      * @deprecated Use enrollmentStudentTransactions() instead
      */
     public function studentTransactions()
@@ -323,7 +327,7 @@ final class StudentEnrollment extends Model
     public function getAssessmentPathAttribute(): string
     {
         return $this->resources()
-            ->where("type", "assessment")
+            ->where('type', 'assessment')
             ->latest()
             ->first()->file_path;
     }
@@ -331,7 +335,7 @@ final class StudentEnrollment extends Model
     public function getCertificatePathAttribute(): string
     {
         return $this->resources()
-            ->where("type", "certificate")
+            ->where('type', 'certificate')
             ->latest()
             ->first()->file_path;
     }
@@ -339,36 +343,36 @@ final class StudentEnrollment extends Model
     public function getAssessmentUrlAttribute(): string
     {
         $resource = $this->resources()
-            ->where("type", "assessment")
+            ->where('type', 'assessment')
             ->latest()
             ->first();
-        if (!$resource) {
-            return "";
+        if (! $resource) {
+            return '';
         }
 
         // Use asset helper instead of Storage::url
         try {
-            return asset("storage/" . mb_ltrim($resource->file_path, "/"));
+            return asset('storage/'.mb_ltrim($resource->file_path, '/'));
         } catch (Exception) {
-            return "";
+            return '';
         }
     }
 
     public function getCertificateUrlAttribute(): string
     {
         $resource = $this->resources()
-            ->where("type", "certificate")
+            ->where('type', 'certificate')
             ->latest()
             ->first();
-        if (!$resource) {
-            return "";
+        if (! $resource) {
+            return '';
         }
 
         // Use asset helper instead of Storage::url
         try {
-            return asset("storage/" . mb_ltrim($resource->file_path, "/"));
+            return asset('storage/'.mb_ltrim($resource->file_path, '/'));
         } catch (Exception) {
-            return "";
+            return '';
         }
     }
 
@@ -385,7 +389,7 @@ final class StudentEnrollment extends Model
         $semester = $settingsService->getCurrentSemester(); // integer (1 or 2)
 
         return $query
-            ->where("school_year", $schoolYear)
-            ->where("semester", $semester);
+            ->where('school_year', $schoolYear)
+            ->where('semester', $semester);
     }
 }

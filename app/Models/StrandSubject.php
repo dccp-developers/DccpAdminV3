@@ -8,16 +8,17 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
 /**
  * Class StrandSubject
  *
  * @property-read \App\Models\ShsStrand|null $strand
+ *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|StrandSubject newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|StrandSubject newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|StrandSubject query()
+ *
  * @mixin \Eloquent
  */
 final class StrandSubject extends Model

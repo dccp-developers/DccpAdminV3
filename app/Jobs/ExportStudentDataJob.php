@@ -2,21 +2,21 @@
 
 namespace App\Jobs;
 
-use App\Services\StudentReportingService;
-use App\Services\GeneralSettingsService;
-use App\Models\User;
 use App\Models\ExportJob;
+use App\Models\User;
+use App\Services\GeneralSettingsService;
+use App\Services\StudentReportingService;
+use Filament\Notifications\Actions\Action;
+use Filament\Notifications\Notification;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
-use Filament\Notifications\Notification;
-use Filament\Notifications\Actions\Action;
 
 class ExportStudentDataJob implements ShouldQueue
 {
-    use Queueable, InteractsWithQueue, SerializesModels;
+    use InteractsWithQueue, Queueable, SerializesModels;
 
     protected int $exportJobId;
 
@@ -42,8 +42,9 @@ class ExportStudentDataJob implements ShouldQueue
     {
         $exportJob = ExportJob::find($this->exportJobId);
 
-        if (!$exportJob) {
+        if (! $exportJob) {
             Log::error('Export job not found', ['export_job_id' => $this->exportJobId]);
+
             return;
         }
 
@@ -76,7 +77,7 @@ class ExportStudentDataJob implements ShouldQueue
             $exportJob->markAsFailed($e->getMessage());
 
             // Log the error
-            Log::error('Export job failed: ' . $e->getMessage(), [
+            Log::error('Export job failed: '.$e->getMessage(), [
                 'export_job_id' => $this->exportJobId,
                 'user_id' => $exportJob->user_id,
                 'filters' => $exportJob->filters,
@@ -95,11 +96,11 @@ class ExportStudentDataJob implements ShouldQueue
         $filterSuffix = '';
 
         if ($exportJob->filters['course_filter'] !== 'all') {
-            $filterSuffix .= '_' . $exportJob->filters['course_filter'];
+            $filterSuffix .= '_'.$exportJob->filters['course_filter'];
         }
 
         if ($exportJob->filters['year_level_filter'] !== 'all') {
-            $filterSuffix .= '_year' . $exportJob->filters['year_level_filter'];
+            $filterSuffix .= '_year'.$exportJob->filters['year_level_filter'];
         }
 
         $extension = $exportJob->format === 'pdf' ? 'html' : 'csv';
@@ -120,7 +121,7 @@ class ExportStudentDataJob implements ShouldQueue
                     Action::make('download')
                         ->label('Download')
                         ->url(route('export.download', $exportJob->id))
-                        ->openUrlInNewTab()
+                        ->openUrlInNewTab(),
                 ])
                 ->sendToDatabase($user);
         }

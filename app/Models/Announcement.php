@@ -8,16 +8,17 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
 /**
  * Class Announcement
  *
  * @property-read \App\Models\User|null $user
+ *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Announcement newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Announcement newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Announcement query()
+ *
  * @mixin \Eloquent
  */
 final class Announcement extends Model

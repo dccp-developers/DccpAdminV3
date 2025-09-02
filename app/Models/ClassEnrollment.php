@@ -8,7 +8,6 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -17,12 +16,14 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  *
  * @property-read \App\Models\Classes|null $class
  * @property-read \App\Models\Student|null $student
+ *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ClassEnrollment newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ClassEnrollment newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ClassEnrollment onlyTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ClassEnrollment query()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ClassEnrollment withTrashed(bool $withTrashed = true)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ClassEnrollment withoutTrashed()
+ *
  * @mixin \Eloquent
  */
 final class ClassEnrollment extends Model

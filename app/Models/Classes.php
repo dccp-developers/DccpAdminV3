@@ -9,7 +9,6 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Services\GeneralSettingsService;
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
@@ -51,12 +50,14 @@ use Illuminate\Database\Eloquent\Model;
  * @property-read mixed $subject_with_fallback
  * @property-read Collection<int, \App\Models\Schedule> $schedules
  * @property-read int|null $schedules_count
+ *
  * @method static Builder<static>|Classes college()
  * @method static Builder<static>|Classes currentAcademicPeriod()
  * @method static Builder<static>|Classes newModelQuery()
  * @method static Builder<static>|Classes newQuery()
  * @method static Builder<static>|Classes query()
  * @method static Builder<static>|Classes shs()
+ *
  * @mixin \Eloquent
  */
 final class Classes extends Model
@@ -91,7 +92,6 @@ final class Classes extends Model
         'shs_strand_id',
         'grade_level',
     ];
-
 
     public function class_enrollments()
     {

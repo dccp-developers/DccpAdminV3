@@ -8,7 +8,6 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use Carbon\Carbon;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasAvatar;
 use Filament\Panel;
@@ -29,9 +28,11 @@ use Illuminate\Notifications\Notifiable;
  * @property-read string $name
  * @property-read \Illuminate\Notifications\DatabaseNotificationCollection<int, \Illuminate\Notifications\DatabaseNotification> $notifications
  * @property-read int|null $notifications_count
+ *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Faculty newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Faculty newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Faculty query()
+ *
  * @mixin \Eloquent
  */
 final class Faculty extends Authenticatable implements FilamentUser, HasAvatar

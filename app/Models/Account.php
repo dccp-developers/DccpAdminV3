@@ -8,12 +8,10 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use Carbon\Carbon;
-use App\Models\Student;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * Class Account
@@ -27,12 +25,14 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read Model|\Eloquent $person
  * @property-read \App\Models\ShsStudent|null $shsStudent
  * @property-read Student|null $student
+ *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Account newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Account newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Account onlyTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Account query()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Account withTrashed(bool $withTrashed = true)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Account withoutTrashed()
+ *
  * @mixin \Eloquent
  */
 final class Account extends Model
@@ -93,16 +93,14 @@ final class Account extends Model
         return $this->ownedTeamsBase();
     }
 
-
-
-
     public function person()
     {
         return $this->morphTo();
     }
+
     public function getProfilePhotoUrlAttribute()
     {
-        if (!$this->profile_photo_path) {
+        if (! $this->profile_photo_path) {
             return null;
         }
 
@@ -145,8 +143,6 @@ final class Account extends Model
     {
         return $this->belongsTo(ShsStudent::class, 'person_id', 'student_lrn');
     }
-
-
 
     public function getIsStudentAttribute()
     {
@@ -202,14 +198,12 @@ final class Account extends Model
     {
         if ($this->person_type === Faculty::class) {
             // For Faculty, check if email matches and person_type is set
-            return !empty($this->email) && !empty($this->person_type);
+            return ! empty($this->email) && ! empty($this->person_type);
         }
 
         // For other person types, check person_id and person_type
-        return !empty($this->person_id) && !empty($this->person_type);
+        return ! empty($this->person_id) && ! empty($this->person_type);
     }
-
-    
 
     // public function getPhotoUrl(): Attribute
     // {
@@ -249,8 +243,9 @@ final class Account extends Model
         }
         $enrollment = \App\Models\PendingEnrollment::where(function ($query) {
             $query->whereJsonContains('data->email', $this->email)
-                  ->orWhereJsonContains('data->enrollment_google_email', $this->email);
+                ->orWhereJsonContains('data->enrollment_google_email', $this->email);
         })->where('status', 'approved')->first();
+
         return $enrollment;
     }
 }

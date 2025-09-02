@@ -8,7 +8,6 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -29,12 +28,14 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read string $payment_status
  * @property-read string $status_class
  * @property-read \App\Models\Student|null $student
+ *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|StudentTuition newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|StudentTuition newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|StudentTuition onlyTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|StudentTuition query()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|StudentTuition withTrashed(bool $withTrashed = true)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|StudentTuition withoutTrashed()
+ *
  * @mixin \Eloquent
  */
 final class StudentTuition extends Model

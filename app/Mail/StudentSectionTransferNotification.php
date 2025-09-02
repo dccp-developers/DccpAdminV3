@@ -30,7 +30,7 @@ final class StudentSectionTransferNotification extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Class Section Transfer Notification - ' . $this->emailData['subject_code'],
+            subject: 'Class Section Transfer Notification - '.$this->emailData['subject_code'],
         );
     }
 

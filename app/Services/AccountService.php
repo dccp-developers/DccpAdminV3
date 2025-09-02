@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Models\Account;
-use App\Models\Student;
 use App\Models\Faculty;
 use App\Models\ShsStudent;
+use App\Models\Student;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -25,14 +25,14 @@ class AccountService
             // Validate email uniqueness
             if (Account::where('email', $accountData['email'])->exists()) {
                 throw ValidationException::withMessages([
-                    'email' => 'An account with this email already exists.'
+                    'email' => 'An account with this email already exists.',
                 ]);
             }
 
             // Validate username uniqueness
             if (Account::where('username', $accountData['username'])->exists()) {
                 throw ValidationException::withMessages([
-                    'username' => 'An account with this username already exists.'
+                    'username' => 'An account with this username already exists.',
                 ]);
             }
 
@@ -59,12 +59,12 @@ class AccountService
                 $accountData['role'] = $this->determineRoleFromPerson($person);
 
                 // Use person's email if not provided
-                if (!isset($accountData['email']) && $person->email) {
+                if (! isset($accountData['email']) && $person->email) {
                     $accountData['email'] = $person->email;
                 }
 
                 // Use person's name if not provided
-                if (!isset($accountData['name'])) {
+                if (! isset($accountData['name'])) {
                     $accountData['name'] = $this->getPersonName($person);
                 }
             }
@@ -74,7 +74,7 @@ class AccountService
             Log::info('Account created successfully', [
                 'account_id' => $account->id,
                 'email' => $account->email,
-                'linked_person' => $person ? get_class($person) : null
+                'linked_person' => $person ? get_class($person) : null,
             ]);
 
             return $account;
@@ -94,7 +94,7 @@ class AccountService
             $existingAccount = $this->findAccountByPerson($person);
             if ($existingAccount && $existingAccount->id !== $account->id) {
                 throw ValidationException::withMessages([
-                    'person' => 'This person is already linked to another account.'
+                    'person' => 'This person is already linked to another account.',
                 ]);
             }
 
@@ -107,7 +107,7 @@ class AccountService
             ];
 
             // For Faculty, we don't use person_id due to UUID vs bigint issue
-            if (!($person instanceof Faculty)) {
+            if (! ($person instanceof Faculty)) {
                 $updateData['person_id'] = $this->getPersonId($person);
             } else {
                 $updateData['person_id'] = null;
@@ -118,7 +118,7 @@ class AccountService
             Log::info('Account linked to person', [
                 'account_id' => $account->id,
                 'person_type' => get_class($person),
-                'person_id' => $this->getPersonId($person)
+                'person_id' => $this->getPersonId($person),
             ]);
 
             return $account->fresh();
@@ -131,9 +131,9 @@ class AccountService
     public function unlinkAccountFromPerson(Account $account): Account
     {
         return DB::transaction(function () use ($account) {
-            if (!$account->person_id || !$account->person_type) {
+            if (! $account->person_id || ! $account->person_type) {
                 throw ValidationException::withMessages([
-                    'account' => 'Account is not linked to any person.'
+                    'account' => 'Account is not linked to any person.',
                 ]);
             }
 
@@ -149,7 +149,7 @@ class AccountService
             Log::info('Account unlinked from person', [
                 'account_id' => $account->id,
                 'old_person_type' => $oldPersonType,
-                'old_person_id' => $oldPersonId
+                'old_person_id' => $oldPersonId,
             ]);
 
             return $account->fresh();
@@ -202,9 +202,9 @@ class AccountService
     public function activateAccount(Account $account): Account
     {
         $account->update(['is_active' => true]);
-        
+
         Log::info('Account activated', ['account_id' => $account->id]);
-        
+
         return $account->fresh();
     }
 
@@ -214,9 +214,9 @@ class AccountService
     public function deactivateAccount(Account $account): Account
     {
         $account->update(['is_active' => false]);
-        
+
         Log::info('Account deactivated', ['account_id' => $account->id]);
-        
+
         return $account->fresh();
     }
 
@@ -226,11 +226,11 @@ class AccountService
     public function resetPassword(Account $account, string $newPassword): Account
     {
         $account->update([
-            'password' => Hash::make($newPassword)
+            'password' => Hash::make($newPassword),
         ]);
-        
+
         Log::info('Account password reset', ['account_id' => $account->id]);
-        
+
         return $account->fresh();
     }
 
@@ -242,16 +242,16 @@ class AccountService
         if ($person instanceof Student) {
             return $person->id;
         }
-        
+
         if ($person instanceof Faculty) {
             return $person->id; // Faculty uses UUID
         }
-        
+
         if ($person instanceof ShsStudent) {
             return $person->student_lrn; // SHS uses LRN
         }
-        
-        throw new \InvalidArgumentException('Unsupported person type: ' . get_class($person));
+
+        throw new \InvalidArgumentException('Unsupported person type: '.get_class($person));
     }
 
     /**
@@ -262,15 +262,15 @@ class AccountService
         if ($person instanceof Student) {
             return trim("{$person->first_name} {$person->middle_name} {$person->last_name}");
         }
-        
+
         if ($person instanceof Faculty) {
             return $person->getFullNameAttribute();
         }
-        
+
         if ($person instanceof ShsStudent) {
             return $person->fullname ?? 'Unknown';
         }
-        
+
         return 'Unknown';
     }
 
@@ -282,11 +282,11 @@ class AccountService
         if ($person instanceof Student || $person instanceof ShsStudent) {
             return 'student';
         }
-        
+
         if ($person instanceof Faculty) {
             return 'faculty';
         }
-        
+
         return 'guest';
     }
 
@@ -295,9 +295,9 @@ class AccountService
      */
     private function validatePersonLinking(Model $person): void
     {
-        if (!($person instanceof Student) && 
-            !($person instanceof Faculty) && 
-            !($person instanceof ShsStudent)) {
+        if (! ($person instanceof Student) &&
+            ! ($person instanceof Faculty) &&
+            ! ($person instanceof ShsStudent)) {
             throw new \InvalidArgumentException('Person must be a Student, Faculty, or ShsStudent');
         }
     }
@@ -318,6 +318,7 @@ class AccountService
 
         // For other person types, use person_id
         $personId = $this->getPersonId($person);
+
         return Account::where('person_id', $personId)
             ->where('person_type', $personType)
             ->first();
