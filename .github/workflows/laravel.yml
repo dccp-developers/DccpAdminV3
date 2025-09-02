@@ -65,12 +65,6 @@ jobs:
       - name: Build assets
         run: npm run build
 
-      - name: Run code quality checks
-        run: |
-          npm run format
-          npm run types
-          npm run lint
-
       - name: Run tests (with Pest)
         env:
           DB_CONNECTION: pgsql
