@@ -82,6 +82,19 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
+      - name: Get Composer cache directory
+        id: composer-cache-build
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            vendor
+            ${{ steps.composer-cache-build.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
       - name: Install NPM dependencies
         run: npm ci
 
@@ -101,11 +114,12 @@ jobs:
       - name: Create release archive
         run: |
           tar -czf release.tar.gz \
+            --exclude=release.tar.gz \
             --exclude=node_modules \
             --exclude=.git \
             --exclude=tests \
             --exclude=.github \
-            --exclude=*.log \
+            --exclude='*.log' \
             .
 
       - name: Upload release artifact
@@ -124,11 +138,17 @@ jobs:
         with:
           name: release
 
-      - name: Prepare Environment File
-        run: |
-          echo "${{ secrets.ENV_FILE }}" | base64 --decode > .env
+      - name: Upload release archive
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          source: "release.tar.gz"
+          target: "/home/deployer/laravel"
 
-      - name: Deploy to VPS
+      - name: Deploy and restart services
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.SSH_HOST }}
@@ -137,10 +157,6 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           script: |
             cd /home/deployer/laravel
-            # Upload release archive
-            scp -P ${{ secrets.SSH_PORT }} release.tar.gz ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/deployer/laravel/
-            # Run deployment script
             /home/deployer/deploy.sh
-            # Restart services
             sudo systemctl restart nginx
             sudo systemctl restart php-fpm
