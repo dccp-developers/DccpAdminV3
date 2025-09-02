@@ -79,7 +79,6 @@ jobs:
           REDIS_HOST: 127.0.0.1
           REDIS_PORT: 6379
           SESSION_DRIVER: array
-        run: ./vendor/bin/pest
 
   build:
     name: 🏗️ Build Release
