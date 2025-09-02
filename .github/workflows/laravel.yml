@@ -41,7 +41,7 @@ jobs:
           cache: 'npm'
 
       - name: Copy .env.testing
-        run: cp .env.testing .env
+        run: cp .env.example .env
 
       - name: Get Composer cache directory
         id: composer-cache
