@@ -5,8 +5,8 @@ on:
     branches: [ "main" ]
 
 jobs:
-  test:
-    name: 🧪 Test & Lint
+  build-and-test:
+    name: 🏗️ Build, Test & Package
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -40,7 +40,7 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
-      - name: Copy .env.testing
+      - name: Copy .env for testing
         run: cp .env.example .env
 
       - name: Get Composer cache directory
@@ -56,7 +56,7 @@ jobs:
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
           restore-keys: ${{ runner.os }}-composer-
 
-      - name: Install Composer dependencies
+      - name: Install Composer dependencies (with dev)
         run: composer install --prefer-dist --no-progress
 
       - name: Generate Key
@@ -65,62 +65,32 @@ jobs:
       - name: Install NPM dependencies
         run: npm ci
 
-      - name: Build assets
+      - name: Build assets for production
         run: npm run build
 
-  build:
-    name: 🏗️ Build Release
-    needs: test
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-
-      - name: Get Composer cache directory
-        id: composer-cache-build
-        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
-
-      - name: Cache Composer dependencies
-        uses: actions/cache@v4
-        with:
-          path: |
-            vendor
-            ${{ steps.composer-cache-build.outputs.dir }}
-          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
-          restore-keys: ${{ runner.os }}-composer-
-
-      - name: Install NPM dependencies
-        run: npm ci
-
-      - name: Build assets
-        run: npm run build
-
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.4'
-          extensions: mbstring, dom, fileinfo, pgsql, zip, gd, intl, redis, imagick
-          tools: composer:v2
-
-      - name: Install Composer dependencies
+      - name: Install Composer dependencies (production)
         run: composer install --no-dev --prefer-dist --no-progress
 
       - name: Create release archive
         run: |
-          tar -czf release.tar.gz \
-            --exclude=release.tar.gz \
-            --exclude=node_modules \
-            --exclude=.git \
-            --exclude=tests \
-            --exclude=.github \
-            --exclude='*.log' \
-            .
+          mkdir release
+          rsync -av . release/ \
+            --exclude .git \
+            --exclude .github \
+            --exclude node_modules \
+            --exclude tests \
+            --exclude '*.log' \
+            --exclude '.env' \
+            --exclude 'storage/logs/*.log' \
+            --exclude 'bootstrap/cache/*.php' \
+            --exclude 'release' \
+            --exclude 'release.tar.gz' \
+            --exclude '.editorconfig' \
+            --exclude 'phpunit.xml' \
+            --exclude 'pint.json' \
+            --exclude 'rector.php'
+          cd release
+          tar -czf ../release.tar.gz .
 
       - name: Upload release artifact
         uses: actions/upload-artifact@v4
@@ -130,7 +100,7 @@ jobs:
 
   deploy:
     name: 🚀 Deploy to Production
-    needs: build
+    needs: build-and-test
     runs-on: ubuntu-latest
     steps:
       - name: Download release artifact
