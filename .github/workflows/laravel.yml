@@ -59,6 +59,9 @@ jobs:
       - name: Install Composer dependencies
         run: composer install --prefer-dist --no-progress
 
+      - name: Generate Key
+        run: php artisan key:generate
+
       - name: Install NPM dependencies
         run: npm ci
 
