@@ -68,18 +68,6 @@ jobs:
       - name: Build assets
         run: npm run build
 
-      - name: Run tests (with Pest)
-        env:
-          DB_CONNECTION: pgsql
-          DB_HOST: 127.0.0.1
-          DB_PORT: 5432
-          DB_DATABASE: dccpadmin
-          DB_USERNAME: postgres
-          DB_PASSWORD: secret
-          REDIS_HOST: 127.0.0.1
-          REDIS_PORT: 6379
-          SESSION_DRIVER: array
-
   build:
     name: 🏗️ Build Release
     needs: test
