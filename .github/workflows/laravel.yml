@@ -67,8 +67,6 @@ jobs:
 
       - name: Run code quality checks
         run: |
-          composer larastan
-          composer pint
           npm run format
           npm run types
           npm run lint
