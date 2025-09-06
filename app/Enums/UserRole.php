@@ -26,9 +26,9 @@ enum UserRole: string implements HasColor, HasLabel
     public function getColor(): string|array|null
     {
         return match ($this) {
-            self::Developer => Color::Red,
+            self::Developer => Color::Emerald,
             self::Admin => Color::Blue,
-            self::User => Color::Green,
+            self::User => Color::Cyan,
         };
     }
 }

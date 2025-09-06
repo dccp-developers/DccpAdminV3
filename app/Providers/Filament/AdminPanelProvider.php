@@ -58,9 +58,7 @@ final class AdminPanelProvider extends PanelProvider
             ->brandLogoHeight('3rem')
             ->favicon(fn () => $this->settings->favicon ? '/'.$this->settings->favicon : null)
             ->login()
-            ->colors([
-                'primary' => Color::hex('#fc6a3e'),
-            ])
+            ->colors(Color::Cyan)
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
             ->discoverClusters(in: app_path('Filament/Clusters'), for: 'App\\Filament\\Clusters')
@@ -105,6 +103,7 @@ final class AdminPanelProvider extends PanelProvider
                     ->shouldShowAvatarForm(false)
                     ->shouldShowDeleteAccountForm(true)
                     ->shouldShowEmailForm(false),
+                
             ])
             ->userMenuItems([
                 'profile' => Action::make('profile')
